@@ -1,0 +1,85 @@
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.os.OperatingSystem
+
+configurations {
+    liquibase
+}
+
+dependencies {
+    liquibase "org.liquibase.ext:liquibase-hibernate5:${liquibase_hibernate5_version}"
+}
+
+if (OperatingSystem.current().isWindows()) {
+    task pathingLiquibaseJar(type: Jar) {
+        dependsOn configurations.liquibase
+        appendix = 'pathingLiquibase'
+
+        doFirst {
+            manifest {
+                attributes 'Class-Path':
+                        sourceSets.main.runtimeClasspath.plus(configurations.liquibase)
+                                .collect {
+                            it.toURL().toString().replaceFirst(/file:\/+/, '/')
+                        }.join(' ')
+            }
+        }
+    }
+}
+
+task liquibaseDiffChangelog(dependsOn: compileJava, type: JavaExec) {
+    group = "liquibase"
+
+//    if (OperatingSystem.current().isWindows()) {
+//        dependsOn pathingLiquibaseJar
+//        doFirst {
+//            classpath = files(pathingLiquibaseJar.archivePath)
+//        }
+//    } else {
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.liquibase
+//    }
+    main = "liquibase.integration.commandline.Main"
+
+    args "--changeLogFile=src/main/resources/db/jobber-changelog/" + buildTimestamp() +"_changelog.xml"
+    args "--referenceUrl=hibernate:spring:uk.gov.ofwat.jobber.domain?dialect=org.hibernate.dialect.H2Dialect&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
+    args "--username=jobber"
+    args "--password="
+    args "--url=jdbc:h2:file:./build/h2db/db/jobber"
+    args "--driver=org.h2.Driver"
+    args "diffChangeLog"
+}
+
+task liquibaseUpdate(dependsOn: compileJava, type: JavaExec) {
+    group = "liquibase"
+
+//    if (OperatingSystem.current().isWindows()) {
+//        dependsOn pathingLiquibaseJar
+//        doFirst {
+//            classpath = files(pathingLiquibaseJar.archivePath)
+//        }
+//    } else {
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.liquibase
+    /**
+     * Remeber that you put this here, if liquibase is having issues.
+     */
+    //classpath files('../jobber/src/main/resources')
+//    }
+    main = "liquibase.integration.commandline.Main"
+
+    args "--changeLogFile=src/main/resources/db/jobber-changelog/master.xml"
+    args "--referenceUrl=hibernate:spring:uk.gov.ofwat.jobber.domain?dialect=org.hibernate.dialect.H2Dialect&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
+    args "--username=jobber"
+    args "--password="
+    args "--url=jdbc:h2:file:./build/h2db/db/jobber"
+    args "--driver=org.h2.Driver"
+    args "updateSQL"
+}
+
+
+def buildTimestamp() {
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMddHHmmss')
+    return formattedDate
+}

@@ -1,0 +1,62 @@
+import org.gradle.api.tasks.wrapper.Wrapper
+
+group 'uk.gov.ofwat'
+version '1.0-SNAPSHOT'
+
+task wrapper(type: Wrapper) {
+//    gradleVersion = '3.5'
+    gradleVersion = '4.2.1'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
+}
+
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/milestone/" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.4.RELEASE")
+    }
+}
+
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+apply from: 'gradle/liquibase.gradle'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'uk.gov.ofwat'
+            artifactId 'jobber'
+            version '0.1'
+            from components.java
+        }
+    }
+}
+
+dependencies {
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile ("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: 'com.vaadin.external.google', module: 'android-json'
+    }
+    compile group: 'org.springframework', name: 'spring-context-support', version: '4.2.4.RELEASE'
+    compile('org.springframework.boot:spring-boot-starter')
+    compile ('org.springframework.boot:spring-boot-starter-data-jpa')
+    //compile ('org.springframework.boot:spring-boot-starter-quartz')
+    compile('org.quartz-scheduler:quartz:2.2.1')
+    compile("com.h2database:h2")
+    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+    //compile group: 'org.springframework.data', name: 'spring-data-commons', version: '2.0.0.M4'
+    compile('org.liquibase:liquibase-core')
+}
