@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Inheritance
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "jobber_job")
 public abstract class Job extends AbstractJobAuditingEntity{
 

@@ -19,6 +19,15 @@
             <column name="job_type_id" type="BIGINT"/>
             <column name="originator_id" type="BIGINT"/>
             <column name="target_id" type="BIGINT"/>
+            <column name="target_job_uuid" type="BINARY">
+                <constraints nullable="true"/>
+            </column>
+            <column name="originator_job_uuid" type="BINARY">
+                <constraints nullable="true"/>
+            </column>
+            <column name="new_job_status" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
     </changeSet>
     <changeSet author="jtodd (generated)" id="1517146534938-2">

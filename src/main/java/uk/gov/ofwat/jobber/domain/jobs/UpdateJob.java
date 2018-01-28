@@ -2,17 +2,21 @@ package uk.gov.ofwat.jobber.domain.jobs;
 
 import uk.gov.ofwat.jobber.domain.JobStatus;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.util.UUID;
 
 @Entity
 public class UpdateJob extends DefaultJob{
 
-/*    private UUID targetJobUuid;
+    @Column(name = "target_job_uuid")
+    private UUID targetJobUuid;
 
+    @Column(name = "originator_job_uuid")
     private UUID originatorJobUuid;
 
-    private JobStatus newStatus;
+    @Column(name = "new_job_status")
+    private String newStatus;
 
     public UUID getTargetJobUuid() {
         return targetJobUuid;
@@ -30,11 +34,11 @@ public class UpdateJob extends DefaultJob{
         this.originatorJobUuid = originatorJobUuid;
     }
 
-    public JobStatus getNewStatus() {
+    public String getNewStatus() {
         return newStatus;
     }
 
-    public void setNewStatus(JobStatus newStatus) {
+    public void setNewStatus(String newStatus) {
         this.newStatus = newStatus;
-    }*/
+    }
 }
