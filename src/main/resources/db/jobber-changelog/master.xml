@@ -9,6 +9,6 @@
 -->
 
 
-    <include file="classpath:db/jobber-changelog/20180124175950_changelog.xml" relativeToChangelogFile="false"/>
+    <include file="classpath:db/jobber-changelog/20180128133530_changelog.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

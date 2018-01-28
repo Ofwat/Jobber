@@ -1,6 +1,6 @@
 package uk.gov.ofwat.jobber.domain.constants;
 
-public final class JobResponseTypeConstants {
+public final class JobStatusConstants {
 
     public static String RESPONSE_SUCCESS = "SUCCESS";
 
@@ -15,6 +15,6 @@ public final class JobResponseTypeConstants {
     //A new Job awaiting processing.
     public static String RESPONSE_CREATED = "CREATED";
 
-    private JobResponseTypeConstants(){}
+    private JobStatusConstants(){}
 
 }

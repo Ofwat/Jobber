@@ -2,19 +2,18 @@ package uk.gov.ofwat.jobber.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 import uk.gov.ofwat.jobber.domain.*;
-import uk.gov.ofwat.jobber.domain.constants.JobResponseTypeConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
-import uk.gov.ofwat.jobber.domain.constants.OriginatorTargetConstants;
-import uk.gov.ofwat.jobber.domain.factory.AbstractJobFactory;
-import uk.gov.ofwat.jobber.domain.factory.QueryJobFactory;
+import uk.gov.ofwat.jobber.domain.factory.*;
 import uk.gov.ofwat.jobber.repository.*;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @ConfigurationProperties("jobServiceProperties")
@@ -24,7 +23,7 @@ public class JobService {
 
     private final JobMonitor jobMonitor;
 
-    private final JobResponseRepository jobResponseRepository;
+    private final JobStatusRepository jobStatusRepository;
 
     private final JobTypeRepository jobTypeRepository;
 
@@ -32,70 +31,114 @@ public class JobService {
 
     private final JobServiceProperties jobServiceProperties;
 
-    private final OriginatorRepository originatorRepository;
+    private final JobOriginatorRepository jobOriginatorRepository;
 
-    private final TargetRepository targetRepository;
+    private final JobTargetRepository jobTargetRepository;
 
     public JobService(JobMonitor jobMonitor,
                       JobTypeRepository jobTypeRepository,
                       JobBaseRepository jobBaseRepository,
-                      JobResponseRepository jobResponseRepository,
+                      JobStatusRepository jobStatusRepository,
                       JobServiceProperties jobServiceProperties,
-                      OriginatorRepository originatorRepository,
-                      TargetRepository targetRepository){
+                      JobOriginatorRepository jobOriginatorRepository,
+                      JobTargetRepository jobTargetRepository){
         //this.defaultJobRepository = defaultJobRepository;
         this.jobMonitor = jobMonitor;
         this.jobTypeRepository = jobTypeRepository;
         this.jobBaseRepository = jobBaseRepository;
-        this.jobResponseRepository = jobResponseRepository;
+        this.jobStatusRepository = jobStatusRepository;
         this.jobServiceProperties = jobServiceProperties;
-        this.targetRepository = targetRepository;
-        this.originatorRepository = originatorRepository;
-    }
-
-
-    /**
-     * Create a job wiht a payload.
-     * @param jobTypeName
-     * @param payload
-     * @return
-     */
-    public Job createJob(String jobTypeName, JobData jobData){
-        Job job = createJob(jobTypeName);
-        job.setJobData(jobData);
-        jobBaseRepository.save(job);
-        return job;
+        this.jobTargetRepository = jobTargetRepository;
+        this.jobOriginatorRepository = jobOriginatorRepository;
     }
 
     /**
-     * Create a job wihout a payload.
-     * @param jobTypeName
+     * Create a job without a payload.
+     * @param jobInformation
      * @return
      */
-    public Job createJob(String jobTypeName){
-        AbstractJobFactory factory;
-                switch (jobTypeName) {
-            case JobTypeConstants.QUERY_JOB_STATUS:
-                factory = new QueryJobFactory(jobTypeRepository);
-            default:
-                factory = new QueryJobFactory(jobTypeRepository);
-        }
-        Job job = factory.createNewJob();
-
-        Target target = targetRepository.findByName(jobServiceProperties.getDefaultTarget()).get();
-        Originator originator = originatorRepository.findByName(jobServiceProperties.getDefaultOriginator()).get();
-        job.setTarget(target);
-        job.setOriginator(originator);
-
-        Optional<JobResponse> jobResponse = jobResponseRepository.findOneByName(JobResponseTypeConstants.RESPONSE_ACCEPTED);
-        job.setJobResponse(jobResponse.get());
+    public Job createJob(JobInformation jobInformation){
+        Job job = createJobFromFactory(jobInformation);
+        job = assignTarget(job, jobInformation);
+        job = assignOriginator(job, jobInformation);
+        job = assignData(job, jobInformation);
+        job = assignJobStatus(job);
+        job.setUuid(UUID.randomUUID());
         job = (Job)jobBaseRepository.save(job);
         return job;
     }
 
+    private Job assignJobStatus(Job job){
+        Optional<JobStatus> jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED);
+        job.setJobStatus(jobStatus.get());
+        return job;
+    }
+
+    private Job assignTarget(Job job, JobInformation jobInformation){
+        Target target = jobTargetRepository.findByName(jobInformation.getTarget()).get();
+        job.setTarget(target);
+        return job;
+    }
+
+    private Job assignOriginator(Job job, JobInformation jobInformation){
+        String originatorName = jobServiceProperties.getDefaultOriginator();
+        if(jobInformation.getOriginator() != ""){
+            originatorName = jobInformation.getOriginator();
+        }
+        Originator originator = jobOriginatorRepository.findByName(originatorName).get();
+        job.setOriginator(originator);
+        return job;
+    }
+
+    private Job assignData(Job job, JobInformation jobInformation){
+        if(jobInformation.getData() != ""){
+            JobData jobData = new JobData();
+            jobData.setData(Base64.getEncoder().encodeToString(jobInformation.getData().getBytes()));
+            job.setJobData(jobData);
+        }
+        return job;
+    }
+
+    private Job createJobFromFactory(JobInformation jobInformation){
+        AbstractJobFactory factory;
+        switch (jobInformation.getType()) {
+            case JobTypeConstants.QUERY_JOB_STATUS:
+                factory = new QueryJobFactory(jobTypeRepository);
+            case JobTypeConstants.DATA_JOB:
+                factory = new DataJobFactory(jobTypeRepository);
+            case JobTypeConstants.GET_NEW_JOB:
+                factory = new GetNewJobFactory(jobTypeRepository);
+            case JobTypeConstants.REQUEST_VALIDATION_JOB:
+                factory = new RequestValidationJobFactory(jobTypeRepository);
+            case JobTypeConstants.RESPONSE_VALIDATION_JOB:
+                factory = new ResponseValidationJobFactory(jobTypeRepository);
+            case JobTypeConstants.UPDATE_JOB:
+                factory = new UpdateJobFactory(jobTypeRepository);
+            default:
+                factory = new QueryJobFactory(jobTypeRepository);
+        }
+        Job job = factory.createNewJob();
+        return job;
+    }
+
     public List<Job> getUnprocessedJobs(){
-        JobResponse unprocessedJobResponse = jobResponseRepository.findOneByName(JobResponseTypeConstants.RESPONSE_ACCEPTED).get();
-        return jobBaseRepository.findDistinctJobsByJobResponse(unprocessedJobResponse);
+        JobStatus unprocessedJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
+        return jobBaseRepository.findDistinctJobsByJobStatus(unprocessedJobStatus);
+    }
+
+    public Optional<Job> getJobByUuid(UUID uuid){
+        return jobBaseRepository.findByUuid(uuid);
+    }
+
+    public Job updateJobStatus(String uuid, JobStatus jobStatus){
+        UUID u = UUID.fromString(uuid);
+        return updateJobStatus(u, jobStatus);
+    }
+
+    public Job updateJobStatus(UUID uuid, JobStatus jobStatus){
+        Job job = (Job) jobBaseRepository.findByUuid(uuid).get();
+        job.setJobStatus(jobStatus);
+        return (Job) jobBaseRepository.save(job);
     }
 
 }

@@ -1,12 +1,14 @@
 package uk.gov.ofwat.jobber.domain;
 
+import uk.gov.ofwat.jobber.domain.jobs.AbstractJobAuditingEntity;
+
 import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
 @Inheritance
 @Table(name = "jobber_job")
-public abstract class Job {
+public abstract class Job extends AbstractJobAuditingEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +34,7 @@ public abstract class Job {
     private Target target;
 
     @ManyToOne
-    private JobResponse jobResponse;
+    private JobStatus jobStatus;
 
     public Long getId() {
         return id;
@@ -94,11 +96,11 @@ public abstract class Job {
         this.retryCount = retryCount;
     }
 
-    public JobResponse getJobResponse() {
-        return jobResponse;
+    public JobStatus getJobStatus() {
+        return jobStatus;
     }
 
-    public void setJobResponse(JobResponse jobResponse) {
-        this.jobResponse = jobResponse;
+    public void setJobStatus(JobStatus jobStatus) {
+        this.jobStatus = jobStatus;
     }
 }

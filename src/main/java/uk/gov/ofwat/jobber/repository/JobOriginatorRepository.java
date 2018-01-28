@@ -7,6 +7,6 @@ import uk.gov.ofwat.jobber.domain.Originator;
 import java.util.Optional;
 
 @Repository
-public interface OriginatorRepository extends JpaRepository<Originator, Long> {
+public interface JobOriginatorRepository extends JpaRepository<Originator, Long> {
     public Optional<Originator> findByName(String name);
 }

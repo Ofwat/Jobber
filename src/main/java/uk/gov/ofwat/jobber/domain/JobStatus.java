@@ -7,8 +7,8 @@ import java.util.Set;
  *
  */
 @Entity
-@Table(name = "jobber_job_response")
-public class JobResponse {
+@Table(name = "jobber_job_status")
+public class JobStatus {
 
     @Id
     private Long id;
@@ -16,7 +16,7 @@ public class JobResponse {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "jobResponse")
+    @OneToMany(mappedBy = "jobStatus")
     private Set<Job> jobs;
 
     public Set<Job> getJobs() {
