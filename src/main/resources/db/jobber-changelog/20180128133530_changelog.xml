@@ -28,6 +28,7 @@
             <column name="new_job_status" type="varchar(255)">
                 <constraints nullable="true"/>
             </column>
+            <column name="nickname" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
     <changeSet author="jtodd (generated)" id="1517146534938-2">

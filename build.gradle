@@ -47,6 +47,7 @@ publishing {
 dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'javax.servlet:javax.servlet-api:3.1.0'
     testCompile ("org.springframework.boot:spring-boot-starter-test") {
         exclude group: 'com.vaadin.external.google', module: 'android-json'
     }
@@ -57,6 +58,18 @@ dependencies {
     compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
     compile "org.hibernate:hibernate-validator"
     compile "org.hibernate:hibernate-envers"
+
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-json-org"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-hppc"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-hibernate5"
+    compile "com.fasterxml.jackson.core:jackson-annotations"
+    compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
+
+
+    compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
+
     compile ("org.springframework.boot:spring-boot-starter-web") {
         exclude module: 'spring-boot-starter-tomcat'
     }

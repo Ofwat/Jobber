@@ -15,7 +15,7 @@ public class JobServiceProperties {
     private String defaultTarget;
 
     @NotNull
-    private String defaultOriginator;
+    private String whoAmI;
 
     public String getDefaultTarget() {
         return defaultTarget;
@@ -25,11 +25,11 @@ public class JobServiceProperties {
         this.defaultTarget = defaultTarget;
     }
 
-    public String getDefaultOriginator() {
-        return defaultOriginator;
+    public String getWhoAmI() {
+        return whoAmI;
     }
 
-    public void setDefaultOriginator(String defaultOriginator) {
-        this.defaultOriginator = defaultOriginator;
+    public void setWhoAmI(String whoAmI) {
+        this.whoAmI = whoAmI;
     }
 }

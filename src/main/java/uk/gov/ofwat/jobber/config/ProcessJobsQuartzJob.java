@@ -12,6 +12,6 @@ public class ProcessJobsQuartzJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        logger.info("Doing the process Quartz Job");
+        logger.info("\n\n\n Doing the process Quartz Job\n\n\n");
     }
 }

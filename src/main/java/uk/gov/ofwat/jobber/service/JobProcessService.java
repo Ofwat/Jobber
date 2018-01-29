@@ -11,7 +11,7 @@ public class JobProcessService {
     //TODO - Can we just use the scheduled annotation instead of all the other guff?
     @Scheduled(initialDelay=10000, fixedRate=30000)
     public void testMethod(){
-        log.info("In the annotated Quartz job...");
+        log.info("\n\n\n\n*** In the annotated Quartz job... ***\n\n\n\n");
     }
 
 }

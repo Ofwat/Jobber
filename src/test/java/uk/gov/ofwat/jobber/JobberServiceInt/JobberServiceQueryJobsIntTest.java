@@ -26,7 +26,11 @@ import uk.gov.ofwat.jobber.repository.JobTypeRepository;
 import uk.gov.ofwat.jobber.service.JobInformation;
 import uk.gov.ofwat.jobber.service.JobService;
 import uk.gov.ofwat.jobber.service.JobServiceProperties;
-
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,12 +82,43 @@ public class JobberServiceQueryJobsIntTest {
 
     @Test
     public void shouldGetAllUnprocessedJobsForMe(){
-
+        List<Job> myUnprocessedJobs;
+        List<Job> allUnprocessedJobs;
+        List<Job> allJobs;
+        Job myProcessedJob1;
+        Job myProcessedJob2;
+        Job processedJob1;
+        Job myUnprocessedJob1;
+        Job myUnprocessedJob2;
+        Job unProcessedJob1;
+        Given:{
+            JobInformation jobInfoForMe = new JobInformation.Builder(jobServiceProperties.getWhoAmI()).build();
+            JobInformation notForMeJobInfo = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();
+            myUnprocessedJob1 = jobService.createJob(jobInfoForMe);
+            myUnprocessedJob2 = jobService.createJob(jobInfoForMe);
+            unProcessedJob1 = jobService.createJob(notForMeJobInfo);
+            myProcessedJob1 = createProcessedJob(jobServiceProperties.getWhoAmI());
+            myProcessedJob2 = createProcessedJob(jobServiceProperties.getWhoAmI());
+            processedJob1 = createProcessedJob(jobServiceProperties.getDefaultTarget());
+        }
+        When:{
+            myUnprocessedJobs = jobService.getUnprocessedJobsForMe();
+            allUnprocessedJobs = jobService.getUnprocessedJobs();
+            allJobs = jobService.getAllJobs();
+        }
+        Then:{
+            assertThat(myUnprocessedJobs.size(), is(2));
+            assertThat(myUnprocessedJobs, contains(myUnprocessedJob1, myUnprocessedJob2));
+            assertThat(allUnprocessedJobs.size(), is(3));
+            assertThat(allJobs.size(), is(6));
+        }
     }
 
     @Test
     public void shouldGetNextUnprocessedJobForMe(){
-
+        Given:{}
+        When:{}
+        Then:{}
     }
 
 
@@ -96,10 +131,10 @@ public class JobberServiceQueryJobsIntTest {
         List<Job> unprocessedJobs;
         Given:
         {
-            processedJob1 = createProcessedJob();
-            processedJob2 = createProcessedJob();
-            unprocessedJob1 = createUnprocessedJob();
-            unprocessedJob2 = createUnprocessedJob();
+            processedJob1 = createProcessedJob(null);
+            processedJob2 = createProcessedJob(null);
+            unprocessedJob1 = createUnprocessedJob(null);
+            unprocessedJob2 = createUnprocessedJob(null);
         }
         When:
         {
@@ -108,7 +143,7 @@ public class JobberServiceQueryJobsIntTest {
         Then:
         {
             assertThat(unprocessedJobs.size(), is(2));
-            assertTrue(unprocessedJobs.containsAll(new ArrayList<Job>(Arrays.asList(unprocessedJob1, unprocessedJob2))));
+            assertThat(unprocessedJobs, contains(unprocessedJob1, unprocessedJob2));
         }
     }
 
@@ -133,8 +168,13 @@ public class JobberServiceQueryJobsIntTest {
         }
     }
 
-    private Job createProcessedJob() {
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();
+    private Job createProcessedJob(String target) {
+        JobInformation jobInformation;
+        if(target == null) {
+            jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();
+        }else{
+            jobInformation = new JobInformation.Builder(target).build();
+        }
         Job job = jobService.createJob(jobInformation);
         JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get();
         job.setJobStatus(jobStatus);
@@ -144,7 +184,7 @@ public class JobberServiceQueryJobsIntTest {
 
     ;
 
-    private Job createUnprocessedJob() {
+    private Job createUnprocessedJob(String target) {
         JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();
         return jobService.createJob(jobInformation);
     }

@@ -1,5 +1,7 @@
 package uk.gov.ofwat.jobber.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.util.Set;
 
@@ -16,6 +18,7 @@ public class JobStatus {
     @Column(name = "name")
     private String name;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "jobStatus")
     private Set<Job> jobs;
 

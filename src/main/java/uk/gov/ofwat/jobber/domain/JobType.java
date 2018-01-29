@@ -1,6 +1,9 @@
 package uk.gov.ofwat.jobber.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -19,6 +22,7 @@ public class JobType {
     @Column(name = "name")
     private String name;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "jobType")
     private Set<Job> jobs;
 
@@ -44,5 +48,20 @@ public class JobType {
 
     public void setJobs(Set<Job> jobs) {
         this.jobs = jobs;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JobType)) return false;
+        JobType jobType = (JobType) o;
+        return Objects.equals(getId(), jobType.getId()) &&
+                Objects.equals(getName(), jobType.getName());
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(getId(), getName());
     }
 }

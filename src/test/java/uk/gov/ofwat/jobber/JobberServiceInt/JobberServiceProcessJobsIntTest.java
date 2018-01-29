@@ -76,6 +76,9 @@ public class JobberServiceProcessJobsIntTest {
     }
 
     @Test
+    /**
+     * TODO We can implement this after we have it working!
+     */
     public void shouldArchiveJob(){
 /*        Job job;
         Job retrievedJob;
@@ -93,6 +96,48 @@ public class JobberServiceProcessJobsIntTest {
             assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_ACCEPTED);
         }*/
     }
+
+    @Test
+    /**
+     * We will set up a mock validation response job and make sure that it gets processed -
+     * i.e and update is sent back to the originator.
+     */
+    public void shouldProcessADataValidationResponse(){
+        Given:{
+
+        }
+        When:{
+
+        }
+        Then:{
+
+        }
+    }
+
+    @Test
+    /**
+     * We will set up an update job and make sure that the update required in the job is processed.
+     */
+    public void shouldProcessAnUpdateJob(){
+        Given:{
+
+        }
+        When:{
+
+        }
+        Then:{
+
+        }
+    }
+
+    @Test
+    /**
+     * We will set up a validation request and send a response from the target.
+     */
+    public void shouldProcessAValidationRequest(){
+
+    }
+
 
     private Job createProcessedJob(){
         JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();

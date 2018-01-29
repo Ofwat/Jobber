@@ -132,7 +132,7 @@ public class JobberServiceUpdateJobsIntTest {
         Job retrievedJob;
         JobInformation jobInformation;
         When:{
-            jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();
+            jobInformation = new JobInformation.Builder(jobServiceProperties.getWhoAmI()).build();
             job = jobService.createJob(jobInformation);
             retrievedJob = (Job)jobBaseRepository.getOne(job.getId());
         }

@@ -81,7 +81,7 @@ public class JobService {
     }
 
     private Job assignOriginator(Job job, JobInformation jobInformation){
-        String originatorName = jobServiceProperties.getDefaultOriginator();
+        String originatorName = jobServiceProperties.getWhoAmI();
         if(jobInformation.getOriginator() != ""){
             originatorName = jobInformation.getOriginator();
         }
@@ -104,18 +104,25 @@ public class JobService {
         switch (jobInformation.getType()) {
             case JobTypeConstants.QUERY_JOB_STATUS:
                 factory = new QueryJobFactory(jobTypeRepository);
+                break;
             case JobTypeConstants.DATA_JOB:
                 factory = new DataJobFactory(jobTypeRepository);
+                break;
             case JobTypeConstants.GET_NEW_JOB:
                 factory = new GetNewJobFactory(jobTypeRepository);
+                break;
             case JobTypeConstants.REQUEST_VALIDATION_JOB:
                 factory = new RequestValidationJobFactory(jobTypeRepository);
+                break;
             case JobTypeConstants.RESPONSE_VALIDATION_JOB:
                 factory = new ResponseValidationJobFactory(jobTypeRepository);
+                break;
             case JobTypeConstants.UPDATE_JOB:
                 factory = new UpdateJobFactory(jobTypeRepository);
+                break;
             default:
-                factory = new QueryJobFactory(jobTypeRepository);
+                factory = new DefaultJobFactory(jobTypeRepository);
+                break;
         }
         Job job = factory.createNewJob();
         return job;
@@ -123,7 +130,17 @@ public class JobService {
 
     public List<Job> getUnprocessedJobs(){
         JobStatus unprocessedJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
-        return jobBaseRepository.findDistinctJobsByJobStatus(unprocessedJobStatus);
+        return jobBaseRepository.findDistinctJobsByJobStatusOrderByCreatedDateAsc(unprocessedJobStatus);
+    }
+
+    public List<Job> getUnprocessedJobsForMe(){
+        JobStatus unprocessedJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
+        Target target = jobTargetRepository.findByName(jobServiceProperties.getWhoAmI()).get();
+        return jobBaseRepository.findDistinctJobsByJobStatusAndTargetOrderByCreatedDateAsc(unprocessedJobStatus, target);
+    }
+
+    public List<Job> getAllJobs(){
+        return jobBaseRepository.findAll();
     }
 
     public Optional<Job> getJobByUuid(UUID uuid){

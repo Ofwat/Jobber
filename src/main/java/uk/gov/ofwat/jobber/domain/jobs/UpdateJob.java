@@ -1,5 +1,6 @@
 package uk.gov.ofwat.jobber.domain.jobs;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import uk.gov.ofwat.jobber.domain.JobStatus;
 
 import javax.persistence.Column;
@@ -7,6 +8,7 @@ import javax.persistence.Entity;
 import java.util.UUID;
 
 @Entity
+@JsonDeserialize(as = UpdateJob.class)
 public class UpdateJob extends DefaultJob{
 
     @Column(name = "target_job_uuid")
