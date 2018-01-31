@@ -5,6 +5,8 @@ import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.jobs.QueryJob;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
 
+import java.util.HashMap;
+
 public class QueryJobFactory implements AbstractJobFactory {
 
     private final String jobType;
@@ -17,7 +19,7 @@ public class QueryJobFactory implements AbstractJobFactory {
     }
 
     @Override
-    public Job createNewJob() {
+    public Job createNewJob(HashMap<String, String> metaData) {
         QueryJob queryJob = new QueryJob();
         queryJob.setJobType(jobTypeRepository.findByName(JobTypeConstants.QUERY_JOB_STATUS).get());
         return queryJob;

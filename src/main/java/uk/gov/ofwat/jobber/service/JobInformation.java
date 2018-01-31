@@ -3,6 +3,8 @@ package uk.gov.ofwat.jobber.service;
 import org.springframework.stereotype.Component;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 
+import java.util.HashMap;
+
 
 public class JobInformation {
 
@@ -10,12 +12,14 @@ public class JobInformation {
     private final String data;
     private final String originator;
     private final String target;
+    private final HashMap<String, String> metadata;
 
     private JobInformation(Builder builder){
         type = builder.type;
         data = builder.data;
         originator = builder.originator;
         target = builder.target;
+        metadata = builder.metadata;
     }
 
     public static class Builder{
@@ -24,6 +28,7 @@ public class JobInformation {
         private String data = "";
         private String originator = "";
         private final String target;
+        private HashMap<String, String> metadata = new HashMap<String, String>();
 
         public Builder(String target){
             this.target = target;
@@ -38,6 +43,11 @@ public class JobInformation {
             this.originator = originator;
             return this;
         }
+
+        public Builder addMetaData(String key, String value){
+          this.metadata.put(key, value);
+          return this;
+        };
 
         public Builder type(String type){
             this.type = type;
@@ -63,5 +73,9 @@ public class JobInformation {
 
     public String getTarget() {
         return target;
+    }
+
+    public HashMap<String, String> getMetadata() {
+        return metadata;
     }
 }

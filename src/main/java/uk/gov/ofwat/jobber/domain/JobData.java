@@ -11,6 +11,7 @@ public class JobData {
     private Job job;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Lob

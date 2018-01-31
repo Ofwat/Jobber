@@ -45,7 +45,7 @@ task liquibaseDiffChangelog(dependsOn: compileJava, type: JavaExec) {
     args "--referenceUrl=hibernate:spring:uk.gov.ofwat.jobber.domain?dialect=org.hibernate.dialect.H2Dialect&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
     args "--username=jobber"
     args "--password="
-    args "--url=jdbc:h2:file:./build/h2db/db/jobber"
+    args "--url=jdbc:h2:file:./build/h2db/db/jobber;MODE=MySQL"
     args "--driver=org.h2.Driver"
     args "diffChangeLog"
 }
@@ -72,7 +72,7 @@ task liquibaseUpdate(dependsOn: compileJava, type: JavaExec) {
     args "--referenceUrl=hibernate:spring:uk.gov.ofwat.jobber.domain?dialect=org.hibernate.dialect.H2Dialect&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
     args "--username=jobber"
     args "--password="
-    args "--url=jdbc:h2:file:./build/h2db/db/jobber"
+    args "--url=jdbc:h2:file:./build/h2db/db/jobber;MODE=MySQL"
     args "--driver=org.h2.Driver"
     args "updateSQL"
 }

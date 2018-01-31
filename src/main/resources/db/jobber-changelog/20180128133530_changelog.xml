@@ -1,5 +1,13 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <property name="now" value="now()" dbms="h2"/>
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="autoIncrement" value="true"/>
+
     <changeSet author="jtodd (generated)" id="1517146534938-1">
         <createTable tableName="jobber_job">
             <column name="dtype" type="VARCHAR(31)">
@@ -8,10 +16,10 @@
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="jobber_jobPK"/>
             </column>
-            <column name="created_date" type="BINARY(255)">
+            <column name="created_date" type="timestamp" defaultValueDate="${now}">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_modified_date" type="BINARY(255)"/>
+            <column name="last_modified_date" type="timestamp"/>
             <column name="retry_count" type="BIGINT"/>
             <column name="uuid" type="BINARY"/>
             <column name="job_data_id" type="BIGINT"/>
@@ -29,11 +37,16 @@
                 <constraints nullable="true"/>
             </column>
             <column name="nickname" type="VARCHAR(255)"/>
+            <column name="fountain_audit_comment" type="VARCHAR(255)"/>
+            <column name="fountain_excel_mongo_id" type="VARCHAR(255)"/>
+            <column name="fountain_report_id" type="varchar(31)"/>
+            <column name="fountain_run_id" type="varchar(31)"/>
+            <column name="fountain_company_id" type="varchar(31)"/>
         </createTable>
     </changeSet>
     <changeSet author="jtodd (generated)" id="1517146534938-2">
         <createTable tableName="jobber_job_data">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false"/>
             </column>
             <column name="job_data" type="CLOB"/>

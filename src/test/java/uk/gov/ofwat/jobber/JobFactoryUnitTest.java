@@ -9,8 +9,10 @@ import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobType;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.factory.*;
+import uk.gov.ofwat.jobber.domain.jobs.DataJob;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -20,6 +22,8 @@ public class JobFactoryUnitTest {
 
     @Mock
     private JobTypeRepository jobTypeRepository;
+
+    private HashMap<String, String> metaData;
 
     @Before
     public void setupMock(){
@@ -38,6 +42,10 @@ public class JobFactoryUnitTest {
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.RESPONSE_VALIDATION_JOB)).thenReturn(Optional.of(resvt));
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.UPDATE_JOB)).thenReturn(Optional.of(ut));
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.DEFAULT_JOB)).thenReturn(Optional.of(dj));
+
+        //Clear metaData.
+        metaData = new HashMap<String, String>();
+
     }
 
     @Test
@@ -48,7 +56,7 @@ public class JobFactoryUnitTest {
             jobFactory = new QueryJobFactory(jobTypeRepository);
         }
         When:{
-            job = jobFactory.createNewJob();
+            job = jobFactory.createNewJob(metaData);
         }
         Then:{
             assertThat(job.getJobType().getName().equals(JobTypeConstants.QUERY_JOB_STATUS), is(true));
@@ -57,15 +65,30 @@ public class JobFactoryUnitTest {
 
     @Test
     public void shouldCreateADataJob(){
-        Job job;
+        DataJob job;
         AbstractJobFactory jobFactory;
+        String fountainReportId = "999";
+        String companyId = "123";
+        String auditComment = "This is a comment.";
+        String runId = "787";
+        String excelDocMongoId = "FFFFFFFF";
         Given:{
+            metaData.put("fountainReportId", fountainReportId);
+            metaData.put("companyId", companyId);
+            metaData.put("auditComment", auditComment);
+            metaData.put("runId", runId);
+            metaData.put("excelDocMongoId", excelDocMongoId);
             jobFactory = new DataJobFactory(jobTypeRepository);
         }
         When:{
-            job = jobFactory.createNewJob();
+            job = (DataJob) jobFactory.createNewJob(metaData);
         }
         Then:{
+            assertEquals(job.getFountainReportId(), fountainReportId);
+            assertEquals(job.getCompanyId(), companyId);
+            assertEquals(job.getRunId(), runId);
+            assertEquals(job.getExcelMongoDocId(), excelDocMongoId);
+            assertEquals(job.getAuditComment(), auditComment);
             assertThat(job.getJobType().getName().equals(JobTypeConstants.DATA_JOB), is(true));
         }
     };
@@ -78,7 +101,7 @@ public class JobFactoryUnitTest {
             jobFactory = new GetNewJobFactory(jobTypeRepository);
         }
         When:{
-            job = jobFactory.createNewJob();
+            job = jobFactory.createNewJob(metaData);
         }
         Then:{
             assertThat(job.getJobType().getName().equals(JobTypeConstants.GET_NEW_JOB), is(true));
@@ -93,7 +116,7 @@ public class JobFactoryUnitTest {
             jobFactory = new RequestValidationJobFactory(jobTypeRepository);
         }
         When:{
-            job = jobFactory.createNewJob();
+            job = jobFactory.createNewJob(metaData);
         }
         Then:{
             assertThat(job.getJobType().getName().equals(JobTypeConstants.REQUEST_VALIDATION_JOB), is(true));
@@ -108,7 +131,7 @@ public class JobFactoryUnitTest {
             jobFactory = new ResponseValidationJobFactory(jobTypeRepository);
         }
         When:{
-            job = jobFactory.createNewJob();
+            job = jobFactory.createNewJob(metaData);
         }
         Then:{
             assertThat(job.getJobType().getName().equals(JobTypeConstants.RESPONSE_VALIDATION_JOB), is(true));
@@ -123,7 +146,7 @@ public class JobFactoryUnitTest {
             jobFactory = new UpdateJobFactory(jobTypeRepository);
         }
         When:{
-            job = jobFactory.createNewJob();
+            job = jobFactory.createNewJob(metaData);
         }
         Then:{
             assertThat(job.getJobType().getName().equals(JobTypeConstants.UPDATE_JOB), is(true));
@@ -138,7 +161,7 @@ public class JobFactoryUnitTest {
             jobFactory = new DefaultJobFactory(jobTypeRepository);
         }
         When:{
-            job = jobFactory.createNewJob();
+            job = jobFactory.createNewJob(metaData);
         }
         Then:{
             assertThat(job.getJobType().getName().equals(JobTypeConstants.DEFAULT_JOB), is(true));

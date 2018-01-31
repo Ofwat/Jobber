@@ -39,6 +39,7 @@ import uk.gov.ofwat.jobber.web.rest.JobberResource;
 import uk.gov.ofwat.jobber.web.rest.errors.JobberExceptionTranslator;
 
 import javax.persistence.EntityManager;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,9 +145,9 @@ public class JobberResourceIntTest {
     @Transactional
     public void createJob() throws Exception {
         int databaseSizeBeforeCreate = jobBaseRepository.findAll().size();
-
+        HashMap<String, String> metaData = new HashMap<String, String>();
         AbstractJobFactory jobFactory = new UpdateJobFactory(jobTypeRepository);
-        Job job = jobFactory.createNewJob();
+        Job job = jobFactory.createNewJob(metaData);
         job.setTarget(jobTargetRepository.findByName(JobTargetConstants.DCS).get());
         job.setNickname("TEST_JOB");
 

@@ -34,7 +34,7 @@ public abstract class Job extends AbstractJobAuditingEntity{
     private Long id;
 
     @Column(name = "retry_count")
-    private Long retryCount;
+    private Long retryCount = 0L;
 
     @Column(name = "uuid")
     private UUID uuid;

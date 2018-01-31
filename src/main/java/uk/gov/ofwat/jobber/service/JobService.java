@@ -13,10 +13,7 @@ import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
 import uk.gov.ofwat.jobber.domain.jobs.ResponseValidationJob;
 import uk.gov.ofwat.jobber.repository.*;
 
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @ConfigurationProperties("jobServiceProperties")
@@ -38,13 +35,18 @@ public class JobService {
 
     private final JobTargetRepository jobTargetRepository;
 
+    private final JobDataRepository jobDataRepository;
+
+    private List<JobListener> jobListeners = new ArrayList<JobListener>();
+
     public JobService(JobMonitor jobMonitor,
                       JobTypeRepository jobTypeRepository,
                       JobBaseRepository jobBaseRepository,
                       JobStatusRepository jobStatusRepository,
                       JobServiceProperties jobServiceProperties,
                       JobOriginatorRepository jobOriginatorRepository,
-                      JobTargetRepository jobTargetRepository){
+                      JobTargetRepository jobTargetRepository,
+                      JobDataRepository jobDataRepository){
         //this.defaultJobRepository = defaultJobRepository;
         this.jobMonitor = jobMonitor;
         this.jobTypeRepository = jobTypeRepository;
@@ -53,6 +55,7 @@ public class JobService {
         this.jobServiceProperties = jobServiceProperties;
         this.jobTargetRepository = jobTargetRepository;
         this.jobOriginatorRepository = jobOriginatorRepository;
+        this.jobDataRepository = jobDataRepository;
     }
 
     /**
@@ -97,6 +100,7 @@ public class JobService {
         if(jobInformation.getData() != ""){
             JobData jobData = new JobData();
             jobData.setData(Base64.getEncoder().encodeToString(jobInformation.getData().getBytes()));
+            jobDataRepository.save(jobData);
             job.setJobData(jobData);
         }
         return job;
@@ -104,6 +108,7 @@ public class JobService {
 
     private Job createJobFromFactory(JobInformation jobInformation){
         AbstractJobFactory factory;
+        HashMap<String, String> metaData =  jobInformation.getMetadata();
         switch (jobInformation.getType()) {
             case JobTypeConstants.QUERY_JOB_STATUS:
                 factory = new QueryJobFactory(jobTypeRepository);
@@ -127,7 +132,7 @@ public class JobService {
                 factory = new DefaultJobFactory(jobTypeRepository);
                 break;
         }
-        Job job = factory.createNewJob();
+        Job job = factory.createNewJob(metaData);
         return job;
     }
 
@@ -205,6 +210,17 @@ public class JobService {
         return job;
     }
 
+    /**
+     * Add a listener for a job.
+     * @param jobListener
+     */
+    public void addJobListener(JobListener jobListener){
+        jobListeners.add(jobListener);
+    }
 
+    public void updateJobListeners(Job job){
+        jobListeners.stream().filter(jobListener -> jobListener.getUUID().equals(job.getUuid()))
+                .forEachOrdered(jobListener -> jobListener.update(job));
+    }
 
 }

@@ -14,6 +14,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
+import uk.gov.ofwat.jobber.domain.jobs.DataJob;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
@@ -25,7 +28,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.HashMap;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -133,5 +138,39 @@ public class JobberServiceCreateJobsIntTest {
         }
     }
 
-
+    @Test
+    public void shouldCreateDataJobWithMEtaData(){
+        HashMap<String, String> metaData = new HashMap<String, String>();
+        String fountainReportId = "999";
+        String companyId = "123";
+        String auditComment = "This is a comment.";
+        String runId = "787";
+        String excelDocMongoId = "FFFFFFFF";
+        DataJob job;
+        DataJob retrievedJob;
+        JobInformation jobInformation;
+        Given:{
+            jobInformation = new JobInformation.Builder(JobTargetConstants.FOUNTAIN)
+                    .originator(JobTargetConstants.DCS)
+                    .type(JobTypeConstants.DATA_JOB)
+                    .addMetaData("fountainReportId", fountainReportId)
+                    .addMetaData("companyId", companyId)
+                    .addMetaData("auditComment", auditComment)
+                    .addMetaData("runId", runId)
+                    .addMetaData("excelDocMongoId", excelDocMongoId)
+                    .build();
+        }
+        When:{
+            job = (DataJob) jobService.createJob(jobInformation);
+            retrievedJob = (DataJob) jobService.getJobByUuid(job.getUuid()).get();
+        }
+        Then:{
+            assertEquals(retrievedJob.getFountainReportId(), fountainReportId);
+            assertEquals(retrievedJob.getCompanyId(), companyId);
+            assertEquals(retrievedJob.getRunId(), runId);
+            assertEquals(retrievedJob.getExcelMongoDocId(), excelDocMongoId);
+            assertEquals(retrievedJob.getAuditComment(), auditComment);
+            assertThat(retrievedJob.getJobType().getName().equals(JobTypeConstants.DATA_JOB), is(true));
+        }
+    }
 }
