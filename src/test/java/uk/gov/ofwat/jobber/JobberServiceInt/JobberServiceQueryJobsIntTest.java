@@ -166,6 +166,11 @@ public class JobberServiceQueryJobsIntTest {
         }
     }
 
+/*    @Test
+    public void shouldGetNextJobForMe(){
+
+    }*/
+
     public void shouldGetTheNextJobForMeToProcess(){
         //Create some jobs.
         Job nextProcessedJobForMe;

@@ -142,6 +142,11 @@ public class JobService {
         return jobBaseRepository.findDistinctJobsByJobStatusAndTargetOrderByCreatedDateAsc(unprocessedJobStatus, target);
     }
 
+    public Optional<Job> getNextJobForMe(){
+        Target target = jobTargetRepository.findByName(jobServiceProperties.getWhoAmI()).get();
+        return getNextJobForTarget(target.getName());
+    };
+
     public Optional<Job> getNextJobForTarget(String jobTarget){
         Target target = jobTargetRepository.findByName(jobTarget).get();
         JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
