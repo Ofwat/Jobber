@@ -33,9 +33,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-@RunWith(SpringRunner.class)
-@Transactional
-@SpringBootTest
+
 public class JobberServiceProcessJobsIntTest {
 
     Logger logger = LoggerFactory.getLogger(JobberServiceProcessJobsIntTest.class);

@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.JobType;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
@@ -32,10 +33,7 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @Transactional
@@ -168,6 +166,28 @@ public class JobberServiceQueryJobsIntTest {
         }
     }
 
+    public void shouldGetTheNextJobForMeToProcess(){
+        //Create some jobs.
+        Job nextProcessedJobForMe;
+        Job processedJobForMe;
+        Job anotherProcessedJobForMe;
+        Job processedJobNotForMe;
+        Job unprocessedJob;
+        Optional<Job> myNextJob;
+        Given:{
+            nextProcessedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
+            processedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
+            anotherProcessedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
+            processedJobNotForMe = createUnprocessedJob(JobTargetConstants.DCS);
+        }
+        When:{
+            myNextJob = jobService.getNextJobForTarget(JobTargetConstants.DCS);
+        }
+        Then:{
+            assertEquals(myNextJob.get().getUuid(), nextProcessedJobForMe.getUuid());
+        }
+    }
+
     private Job createProcessedJob(String target) {
         JobInformation jobInformation;
         if(target == null) {
@@ -196,5 +216,7 @@ public class JobberServiceQueryJobsIntTest {
         Job updateJob = jobService.createJob(jobInformation);
         return updateJob;
     };
+
+
 
 }

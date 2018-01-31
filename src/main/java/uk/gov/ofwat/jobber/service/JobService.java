@@ -4,10 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import uk.gov.ofwat.jobber.domain.*;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.factory.*;
+import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
+import uk.gov.ofwat.jobber.domain.jobs.ResponseValidationJob;
 import uk.gov.ofwat.jobber.repository.*;
 
 import java.util.Base64;
@@ -139,6 +142,13 @@ public class JobService {
         return jobBaseRepository.findDistinctJobsByJobStatusAndTargetOrderByCreatedDateAsc(unprocessedJobStatus, target);
     }
 
+    public Optional<Job> getNextJobForTarget(String jobTarget){
+        Target target = jobTargetRepository.findByName(jobTarget).get();
+        JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
+        List<Job> jobs = jobBaseRepository.findDistinctJobsByJobStatusAndTargetOrderByCreatedDateAsc(jobStatus, target);
+        return jobs.stream().findFirst();
+    };
+
     public List<Job> getAllJobs(){
         return jobBaseRepository.findAll();
     }
@@ -157,5 +167,39 @@ public class JobService {
         job.setJobStatus(jobStatus);
         return (Job) jobBaseRepository.save(job);
     }
+
+    /**
+     * Create a request validation job that can be then processed.
+     * @param data
+     * @return
+     */
+    public RequestValidationJob createDataValidationRequest(String data) {
+        JobType jobType = jobTypeRepository.findByName(JobTypeConstants.REQUEST_VALIDATION_JOB).get();
+        JobInformation ji = new JobInformation.Builder(jobServiceProperties.getDefaultTarget())
+                .data(data)
+                .type(jobType.getName())
+                .build();
+        RequestValidationJob job = (RequestValidationJob) createJob(ji);
+        return job;
+    };
+
+    /**
+     * Test that we can create a response to a request.
+     * @param responseData
+     * @param requestValidationJob
+     * @return
+     */
+    public ResponseValidationJob createDataValidationResponse(String responseData, RequestValidationJob requestValidationJob){
+        JobType jobType = jobTypeRepository.findByName(JobTypeConstants.RESPONSE_VALIDATION_JOB).get();
+        //Create a response job that goes to the request.
+        JobInformation ji = new JobInformation.Builder(requestValidationJob.getOriginator().getName())
+                .data(responseData)
+                .type(jobType.getName())
+                .build();
+        ResponseValidationJob job = (ResponseValidationJob) createJob(ji);
+        return job;
+    }
+
+
 
 }

@@ -21,4 +21,5 @@ public interface JobBaseRepository<T extends Job> extends JpaRepository<T, Long>
     Optional<Job> findByUuid(UUID uuid);
 
 
+
 }
