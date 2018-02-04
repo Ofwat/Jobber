@@ -20,11 +20,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.Application;
-import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
+import uk.gov.ofwat.jobber.domain.constants.UtilConstants;
 import uk.gov.ofwat.jobber.domain.factory.AbstractJobFactory;
 import uk.gov.ofwat.jobber.domain.factory.UpdateStatusJobFactory;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
@@ -197,7 +198,7 @@ public class JobberResourceIntTest {
             put("key2","val2");
             put("targetJobStatus", JobStatusConstants.RESPONSE_SUCCESS);
             put("targetJobUuid",UUID.randomUUID().toString());
-            put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_TARGET_PROCESSING);}};
+            put(UtilConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_TARGET_PROCESSING);}};
         AbstractJobFactory jobFactory = new UpdateStatusJobFactory(jobTypeRepository, jobStatusRepository);
         JobInformation jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS)
                 .setMetaData(metaData)

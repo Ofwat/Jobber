@@ -7,3 +7,4 @@ id;name
 6;RequestValidationJob
 7;ResponseValidationJob
 8;UpdateStatusJob
+9;DataResponseJob

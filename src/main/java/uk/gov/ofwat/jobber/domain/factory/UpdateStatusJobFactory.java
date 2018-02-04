@@ -2,8 +2,8 @@ package uk.gov.ofwat.jobber.domain.factory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ofwat.jobber.domain.Job;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;

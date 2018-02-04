@@ -1,13 +1,14 @@
-package uk.gov.ofwat.jobber.domain;
+package uk.gov.ofwat.jobber.domain.jobs.attributes;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "jobber_job_originator")
-public class Originator {
+@Table(name = "jobber_job_target")
+public class Target {
 
     @Id
     private Long id;
@@ -16,7 +17,7 @@ public class Originator {
     private String name;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "originator")
+    @OneToMany(mappedBy = "target")
     private Set<Job> jobs;
 
     public Long getId() {

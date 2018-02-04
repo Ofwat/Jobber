@@ -2,8 +2,8 @@ package uk.gov.ofwat.jobber.domain.strategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
@@ -37,9 +37,10 @@ public class ProcessUpdateJob extends ProcessJob {
             Job updatedJob = updateJob(jobToBeUpdated.get(),
                     jobStatusRepository.findOneByName(updateStatusJob.getNewStatus()).get(),
                     updateStatusJob.getMetadata());
+
             jobBaseRepository.save(updatedJob);
 
-            //Update tehe job we are processing to say it has completed and can be archived.
+            //Update the job we are processing to say it has completed and can be archived.
             updateStatusJob.setJobStatus(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get());
             jobBaseRepository.save(updateStatusJob);
 

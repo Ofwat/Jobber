@@ -14,15 +14,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.OriginatorTargetConstants;
 import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
 import uk.gov.ofwat.jobber.domain.jobs.ResponseValidationJob;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
-import uk.gov.ofwat.jobber.service.JobInformation;
 import uk.gov.ofwat.jobber.service.JobService;
 import uk.gov.ofwat.jobber.service.JobServiceProperties;
 

@@ -1,4 +1,4 @@
-package uk.gov.ofwat.jobber.domain;
+package uk.gov.ofwat.jobber.domain.jobs;
 
 import org.springframework.scheduling.annotation.Async;
 

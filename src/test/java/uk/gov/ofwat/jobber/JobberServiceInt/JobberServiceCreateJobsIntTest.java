@@ -12,11 +12,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
+import uk.gov.ofwat.jobber.domain.constants.UtilConstants;
 import uk.gov.ofwat.jobber.domain.jobs.DataJob;
 import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
 import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;
@@ -208,11 +209,11 @@ public class JobberServiceCreateJobsIntTest {
             expectedUpdateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get();
             //The metadata the reques job should have.
             updateMetadata = new HashMap<String, String>(){{put("dataKey1", "dataValue1");
-                put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_TARGET_PROCESSING);}};
+                put(UtilConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_TARGET_PROCESSING);}};
         }
         When:{
             //Create the update job
-            updateStatusJob = jobService.createUpdateJob(targetJobUuid, targetPlatform, expectedRequestJobStatus, updateMetadata);
+            updateStatusJob = jobService.createUpdateStatusJob(targetJobUuid, targetPlatform, expectedRequestJobStatus, updateMetadata);
             originalUpdateJobStatus = updateStatusJob.getJobStatus();
             //Process it.
             jobService.processNextJob();

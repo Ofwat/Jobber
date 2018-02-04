@@ -1,6 +1,6 @@
 package uk.gov.ofwat.jobber.domain.constants;
 
-public class OriginatorTargetConstants {
+public class PlatformNameConstants {
 
     public static final String FOUNTAIN = "FOUNTAIN";
 

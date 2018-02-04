@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import javax.persistence.Entity;
 
 @Entity
-@JsonDeserialize(as = DefaultJob.class)
-public class DefaultJob extends Job {
-
+@JsonDeserialize(as = DataResponseJob.class)
+public class DataResponseJob extends DataJob {
 }

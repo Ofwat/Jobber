@@ -1,12 +1,11 @@
 package uk.gov.ofwat.jobber.web.rest;
 
-import org.hibernate.annotations.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uk.gov.ofwat.jobber.domain.Job;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 import uk.gov.ofwat.jobber.service.JobInformation;
 import uk.gov.ofwat.jobber.service.JobService;
 

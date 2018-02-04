@@ -10,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.JobListener;
-import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
+import uk.gov.ofwat.jobber.domain.jobs.JobListener;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
@@ -68,7 +68,7 @@ public class JobListenerIntTest {
             testJobListener = (TestJobListener) jobService.addJobListener(testJobListener);
         }
         When:{
-            updateJob = jobService.createUpdateJob(job2.getUuid(), JobTargetPlatformConstants.DCS, jobStatus, metadata);
+            updateJob = jobService.createUpdateStatusJob(job2.getUuid(), JobTargetPlatformConstants.DCS, jobStatus, metadata);
             //TODO Do the process.
             Optional<Job> job = jobService.processNextJob();
         }

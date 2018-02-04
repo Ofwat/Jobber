@@ -1,6 +1,7 @@
 package uk.gov.ofwat.jobber.domain;
 
 import org.springframework.stereotype.Component;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 
 import java.util.List;
 

@@ -15,8 +15,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
@@ -30,7 +30,6 @@ import uk.gov.ofwat.jobber.service.JobServiceProperties;
 import java.io.*;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -151,7 +150,7 @@ public class JobberServiceUpdateStatusJobsIntTest {
         List<Job> unprocessedJobs;
         Job retrievedJob;
         Given:{
-            updateJob = createUpdateJob();
+            updateJob = createUpdateStatusJob();
             unprocessedJob1 = createUnprocessedJob();
             processedJob1 = createProcessedJob();
             processedJob2 = createProcessedJob();

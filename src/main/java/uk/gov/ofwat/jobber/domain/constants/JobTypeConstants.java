@@ -6,6 +6,8 @@ public class JobTypeConstants {
 
     public static final String DATA_JOB = "DataJob";
 
+    public static final String DATA_RESPONSE_JOB = "DataResponseJob";
+
     public static final String GET_NEW_JOB = "GetNewJob";
 
     public static final String DEFAULT_JOB = "DefaultJob";

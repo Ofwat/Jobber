@@ -1,6 +1,6 @@
 package uk.gov.ofwat.jobber.service;
 
-import uk.gov.ofwat.jobber.domain.Job;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 
 public interface JobProcessor {
 

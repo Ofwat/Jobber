@@ -1,11 +1,11 @@
-package uk.gov.ofwat.jobber.domain;
+package uk.gov.ofwat.jobber.domain.jobs;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.jobs.*;
+import uk.gov.ofwat.jobber.domain.constants.UtilConstants;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.*;
 
 import javax.persistence.*;
 import java.util.Map;
@@ -156,7 +156,7 @@ public abstract class Job extends AbstractJobAuditingEntity{
     public Optional<UUID> getLinkedJobUuid(){
         Optional<UUID> optionalUuid = Optional.empty();
         for(Map.Entry<String, String> entry : metadata.entrySet()) {
-            if(entry.getKey().equals(JobStatusConstants.LINKED_JOB_KEY)){
+            if(entry.getKey().equals(UtilConstants.LINKED_JOB_KEY)){
                 optionalUuid = (Optional<UUID>) Optional.of(UUID.fromString(entry.getValue()));
             }
         };

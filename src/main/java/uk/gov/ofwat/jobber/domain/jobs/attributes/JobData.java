@@ -1,4 +1,6 @@
-package uk.gov.ofwat.jobber.domain;
+package uk.gov.ofwat.jobber.domain.jobs.attributes;
+
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 
 import javax.persistence.*;
 

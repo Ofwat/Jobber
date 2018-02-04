@@ -1,7 +1,6 @@
 package uk.gov.ofwat.jobber.domain.strategy;
 
-import org.springframework.stereotype.Service;
-import uk.gov.ofwat.jobber.domain.Job;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 import uk.gov.ofwat.jobber.service.JobService;
 
 import java.util.List;

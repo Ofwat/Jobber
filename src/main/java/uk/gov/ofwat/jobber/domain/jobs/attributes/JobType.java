@@ -1,6 +1,7 @@
-package uk.gov.ofwat.jobber.domain;
+package uk.gov.ofwat.jobber.domain.jobs.attributes;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 
 import javax.persistence.*;
 import java.util.Objects;

@@ -8,16 +8,17 @@ import uk.gov.ofwat.jobber.domain.*;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
+import uk.gov.ofwat.jobber.domain.constants.UtilConstants;
 import uk.gov.ofwat.jobber.domain.factory.*;
-import uk.gov.ofwat.jobber.domain.jobs.DataJob;
-import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
-import uk.gov.ofwat.jobber.domain.jobs.ResponseValidationJob;
-import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;
+import uk.gov.ofwat.jobber.domain.jobs.*;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.*;
 import uk.gov.ofwat.jobber.domain.strategy.ProcessDataJob;
+import uk.gov.ofwat.jobber.domain.strategy.ProcessDataResponseJob;
 import uk.gov.ofwat.jobber.domain.strategy.ProcessJob;
 import uk.gov.ofwat.jobber.domain.strategy.ProcessUpdateJob;
 import uk.gov.ofwat.jobber.repository.*;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -130,6 +131,9 @@ public class JobService {
             case JobTypeConstants.DATA_JOB:
                 factory = new DataJobFactory(jobTypeRepository);
                 break;
+            case JobTypeConstants.DATA_RESPONSE_JOB:
+                factory = new DataJobResponseFactory(jobTypeRepository);
+                break;
             case JobTypeConstants.GET_NEW_JOB:
                 factory = new GetNewJobFactory(jobTypeRepository);
                 break;
@@ -171,6 +175,17 @@ public class JobService {
         JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_JOB_CREATED).get();
         List<Job> jobs = jobBaseRepository.findDistinctJobsByJobStatusAndTargetOrderByCreatedDateAsc(jobStatus, target);
         return jobs.stream().findFirst();
+    };
+
+    public List<DataJob> getPendingDataJobs(){
+        ArrayList<JobStatus> statuses = new ArrayList<JobStatus>();
+        Target target = jobTargetRepository.findByName(jobServiceProperties.getWhoAmI()).get();
+        JobStatus jobStatusPending = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PENDING_ACTION).get();
+        JobStatus jobStatusLinked = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_LINKED).get();
+        statuses.add(jobStatusPending);
+        statuses.add(jobStatusLinked);
+        List<DataJob> jobs = jobBaseRepository.findDistinctJobsByJobStatusInAndTargetOrderByCreatedDateAsc(statuses, target);
+        return jobs;
     };
 
     public List<Job> getAllJobs(){
@@ -224,7 +239,7 @@ public class JobService {
         return job;
     }
 
-    public UpdateStatusJob createUpdateJob(UUID targetJobUuid, String jobTargetPlatform, JobStatus targetJobNewStatus, HashMap<String, String> metadata){
+    public UpdateStatusJob createUpdateStatusJob(UUID targetJobUuid, String jobTargetPlatform, JobStatus targetJobNewStatus, HashMap<String, String> metadata){
         //Todo the metadata bit will only work with the dataJobs at the moment.
         metadata.put("targetJobUuid",targetJobUuid.toString());
         metadata.put("targetJobStatus", targetJobNewStatus.getName());
@@ -244,10 +259,10 @@ public class JobService {
         metaData.put("auditComment", auditComment);
         metaData.put("runId", runId.toString());
         metaData.put("excelDocMongoId", "");
-        return creatDataJob(JobTargetPlatformConstants.FOUNTAIN, metaData, data);
+        return createDataJob(JobTargetPlatformConstants.FOUNTAIN, metaData, data);
     }
 
-    public DataJob creatDataJob(String jobTargetPlatform, HashMap<String, String> metadata, String data){
+    public DataJob createDataJob(String jobTargetPlatform, HashMap<String, String> metadata, String data){
         JobInformation jobInformation = new JobInformation.Builder(jobTargetPlatform)
                 .originator(jobServiceProperties.getWhoAmI())
                 .type(JobTypeConstants.DATA_JOB)
@@ -257,6 +272,17 @@ public class JobService {
         return (DataJob) createJob(jobInformation);
     }
 
+    public DataResponseJob createDataResponseJob(DataJob jobToRespondTo, String data){
+        HashMap<String, String> metadata = new HashMap<String, String>(){
+            {put(UtilConstants.LINKED_JOB_KEY, jobToRespondTo.getUuid().toString());}};
+        JobInformation jobInformation = new JobInformation.Builder(jobToRespondTo.getOriginator().getName())
+                .originator(jobServiceProperties.getWhoAmI())
+                .type(JobTypeConstants.DATA_RESPONSE_JOB)
+                .setMetaData(metadata)
+                .data(data)
+                .build();
+        return (DataResponseJob) createJob(jobInformation);
+    }
     public Optional<Job> processNextJob(){
         ProcessJob processJob;
         List<Job> notifyJobs;
@@ -291,6 +317,9 @@ public class JobService {
         switch (jobType.getName()){
             case JobTypeConstants.DATA_JOB:
                 processJob = new ProcessDataJob(this, jobStatusRepository, jobBaseRepository);
+                break;
+            case JobTypeConstants.DATA_RESPONSE_JOB:
+                processJob = new ProcessDataResponseJob(this, jobStatusRepository, jobBaseRepository);
                 break;
             case JobTypeConstants.UPDATE_STATUS_JOB:
                 processJob = new ProcessUpdateJob(this, jobStatusRepository, jobBaseRepository);

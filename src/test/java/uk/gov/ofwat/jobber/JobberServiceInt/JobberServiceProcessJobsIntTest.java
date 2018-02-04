@@ -12,13 +12,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.JobStatus;
+import uk.gov.ofwat.jobber.domain.jobs.DataResponseJob;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
+import uk.gov.ofwat.jobber.domain.jobs.attributes.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.jobs.DataJob;
-import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
@@ -89,20 +89,60 @@ public class JobberServiceProcessJobsIntTest {
         JobStatus updateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_PROCESSING).get();
         Given:{
             //Create an update response from Gofer!
-            job = jobService.creatDataJob(JobTargetPlatformConstants.DCS, metaData, unencodedJson);
+            job = jobService.createDataJob(JobTargetPlatformConstants.DCS, metaData, unencodedJson);
         }
         When:{
+            //This should send an update job to update this job as we are targetting ourselves! ?!
             jobService.processNextJob();
-            //Lets send a fake update from Fountain
-            UpdateStatusJob updateStatusJob = (UpdateStatusJob) jobService.createUpdateJob(job.getUuid(), JobTargetPlatformConstants.DCS, updateJobStatus, emptyMetaData);
+
+            //Process the generated update job.
             jobService.processNextJob();
+
             updatedDataJob = (DataJob) jobService.getJobByUuid(job.getUuid()).get();
         }
         Then:{
-            assertThat(updatedDataJob.getJobStatus().getName(), is(JobStatusConstants.RESPONSE_TARGET_PROCESSING));
+            assertThat(jobService.getUnprocessedJobs().size(), is(0));
+            //This won't work as we are updating the same job in the job process, which would never happen unless the originator and target are the same.
+            //assertThat(updatedDataJob.getJobStatus().getName(), is(JobStatusConstants.RESPONSE_PENDING_ACTION));
+            assertThat(jobService.getPendingDataJobs().size(), is(0));
+        }
+    }
 
-            //TODO What else?
 
+    @Test
+    /*
+    We will create a data job and a mock job update for the job followed by a response to the data job.
+     */
+    public void shouldLinkAndUpdateADataJob(){
+        HashMap<String, String> metaData = createMetadataWithFountainReportInfo();
+        HashMap<String, String> emptyMetaData = new HashMap<String, String>();
+        DataJob job;
+        DataJob updatedDataJob;
+        DataResponseJob dataResponseJob;
+        DataResponseJob retrievedDataResponseJob;
+        JobInformation jobInformation;
+        JobStatus updateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_PROCESSING).get();
+        Given:{
+            //Create an update response from Gofer!
+            job = jobService.createDataJob(JobTargetPlatformConstants.DCS, metaData, unencodedJson);
+        }
+        When:{
+            //This should send an update job to update this job as we are targetting ourselves! ?!
+            jobService.processNextJob();
+            //Process the generated update job.
+            jobService.processNextJob();
+            dataResponseJob = (DataResponseJob) jobService.createDataResponseJob(job, unencodedJson);
+            jobService.processNextJob();
+            updatedDataJob = (DataJob) jobService.getJobByUuid(job.getUuid()).get();
+            retrievedDataResponseJob = (DataResponseJob) jobService.getJobByUuid(dataResponseJob.getUuid()).get();
+        }
+        Then:{
+            assertThat(jobService.getUnprocessedJobs().size(), is(0));
+            assertThat(jobService.getPendingDataJobs().size(), is(1)); //We have a linked job to process!
+            assertThat(retrievedDataResponseJob.getJobStatus().getName(), is(JobStatusConstants.RESPONSE_SUCCESS));
+            assertThat(updatedDataJob.getJobStatus().getName(), is(JobStatusConstants.RESPONSE_LINKED));
+            assertThat(updatedDataJob.getLinkedJobUuid().get(), is(retrievedDataResponseJob.getUuid()));
+            assertThat(retrievedDataResponseJob.getJobData().getData(), is(base64EncodedJson));
         }
     }
 

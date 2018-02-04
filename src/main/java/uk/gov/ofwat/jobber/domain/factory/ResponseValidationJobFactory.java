@@ -1,12 +1,10 @@
 package uk.gov.ofwat.jobber.domain.factory;
 
-import uk.gov.ofwat.jobber.domain.Job;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.jobs.ResponseValidationJob;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
 import uk.gov.ofwat.jobber.service.JobInformation;
-
-import java.util.HashMap;
 
 public class ResponseValidationJobFactory implements AbstractJobFactory {
 

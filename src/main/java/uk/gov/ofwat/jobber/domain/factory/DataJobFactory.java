@@ -1,6 +1,6 @@
 package uk.gov.ofwat.jobber.domain.factory;
 
-import uk.gov.ofwat.jobber.domain.Job;
+import uk.gov.ofwat.jobber.domain.jobs.Job;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.jobs.DataJob;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
