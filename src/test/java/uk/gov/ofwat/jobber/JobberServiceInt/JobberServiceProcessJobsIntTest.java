@@ -1,8 +1,5 @@
 package uk.gov.ofwat.jobber.JobberServiceInt;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,8 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
+import uk.gov.ofwat.jobber.domain.jobs.DataJob;
+import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
@@ -28,12 +27,16 @@ import uk.gov.ofwat.jobber.service.JobService;
 import uk.gov.ofwat.jobber.service.JobServiceProperties;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
-
+@RunWith(SpringRunner.class)
+@Transactional
+@SpringBootTest
 public class JobberServiceProcessJobsIntTest {
 
     Logger logger = LoggerFactory.getLogger(JobberServiceProcessJobsIntTest.class);
@@ -74,6 +77,51 @@ public class JobberServiceProcessJobsIntTest {
     }
 
     @Test
+    /*
+    We will create a data job and a mock job update for the job followed by a response to the data job.
+     */
+    public void shouldCreateAndProcessAndUpdateADataJob(){
+        HashMap<String, String> metaData = createMetadataWithFountainReportInfo();
+        HashMap<String, String> emptyMetaData = new HashMap<String, String>();
+        DataJob job;
+        DataJob updatedDataJob;
+        JobInformation jobInformation;
+        JobStatus updateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PROCESSING).get();
+        Given:{
+            //Create an update response from Gofer!
+            job = jobService.creatDataJob(JobTargetPlatformConstants.DCS, metaData, unencodedJson);
+        }
+        When:{
+            jobService.processNextJob();
+            //Lets send a fake update from Fountain
+            UpdateStatusJob updateStatusJob = (UpdateStatusJob) jobService.createUpdateJob(job.getUuid(), JobTargetPlatformConstants.DCS, updateJobStatus, emptyMetaData);
+            jobService.processNextJob();
+            updatedDataJob = (DataJob) jobService.getJobByUuid(job.getUuid()).get();
+        }
+        Then:{
+            assertThat(updatedDataJob.getJobStatus().getName(), is(JobStatusConstants.RESPONSE_PROCESSING));
+
+            //TODO What else?
+
+        }
+    }
+
+
+    public void shouldCreateAndProcessAndRespondToADataJobFromDcsToFountain(){
+
+    }
+
+    private HashMap<String, String> createMetadataWithFountainReportInfo(){
+        HashMap<String, String> metadata = new HashMap<String, String>();
+        metadata.put("fountainReportId", "999");
+        metadata.put("companyId", "1");
+        metadata.put("auditComment", "Audit comment form test");
+        metadata.put("runId", "100");
+        metadata.put("excelDocMongoId", "Mongo_Id");
+        return metadata;
+    }
+
+    @Test
     /**
      * TODO We can implement this after we have it working!
      */
@@ -101,15 +149,7 @@ public class JobberServiceProcessJobsIntTest {
      * i.e and update is sent back to the originator.
      */
     public void shouldProcessADataValidationResponse(){
-        Given:{
 
-        }
-        When:{
-
-        }
-        Then:{
-
-        }
     }
 
     @Test
@@ -152,7 +192,7 @@ public class JobberServiceProcessJobsIntTest {
     };
 
     private Job createUpdateJob(){
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_JOB).build();
+        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_STATUS_JOB).build();
         Job updateJob = jobService.createJob(jobInformation);
         return updateJob;
     };

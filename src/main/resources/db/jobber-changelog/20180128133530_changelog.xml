@@ -47,7 +47,7 @@
     <changeSet author="jtodd (generated)" id="1517146534938-2">
         <createTable tableName="jobber_job_data">
             <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="job_data" type="CLOB"/>
             <column name="job_id" type="BIGINT"/>
@@ -56,7 +56,7 @@
     <changeSet author="jtodd (generated)" id="1517146534938-3">
         <createTable tableName="jobber_job_originator">
             <column name="id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
         </createTable>
@@ -64,7 +64,7 @@
     <changeSet author="jtodd (generated)" id="1517146534938-4">
         <createTable tableName="jobber_job_status">
             <column name="id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
         </createTable>
@@ -72,7 +72,7 @@
     <changeSet author="jtodd (generated)" id="1517146534938-5">
         <createTable tableName="jobber_job_target">
             <column name="id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
         </createTable>
@@ -80,7 +80,7 @@
     <changeSet author="jtodd (generated)" id="1517146534938-6">
         <createTable tableName="jobber_job_type">
             <column name="id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
         </createTable>
@@ -100,10 +100,10 @@
     <changeSet id="1516816794454-6d" author="jtoddington">
         <loadData tableName="jobber_job_target" separator=";" encoding="UTF-8" file="db/jobber-changelog/originators_targets.csv"></loadData>
     </changeSet>
-    <changeSet author="jtodd (generated)" id="1517146534938-7">
+<!--    <changeSet author="jtodd (generated)" id="1517146534938-7">
         <addPrimaryKey columnNames="id" constraintName="jobber_job_dataPK" tableName="jobber_job_data"/>
-    </changeSet>
-    <changeSet author="jtodd (generated)" id="1517146534938-8">
+    </changeSet>-->
+<!--    <changeSet author="jtodd (generated)" id="1517146534938-8">
         <addPrimaryKey columnNames="id" constraintName="jobber_job_originatorPK" tableName="jobber_job_originator"/>
     </changeSet>
     <changeSet author="jtodd (generated)" id="1517146534938-9">
@@ -114,7 +114,7 @@
     </changeSet>
     <changeSet author="jtodd (generated)" id="1517146534938-11">
         <addPrimaryKey columnNames="id" constraintName="jobber_job_typePK" tableName="jobber_job_type"/>
-    </changeSet>
+    </changeSet>-->
     <changeSet author="jtodd (generated)" id="1517146534938-12">
         <addForeignKeyConstraint baseColumnNames="target_id" baseTableName="jobber_job" constraintName="FK15cyq4k8fug3xhw68mj7mdoxn" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="jobber_job_target"/>
     </changeSet>

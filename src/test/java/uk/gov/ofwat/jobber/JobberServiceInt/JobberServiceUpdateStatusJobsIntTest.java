@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
@@ -28,17 +28,17 @@ import uk.gov.ofwat.jobber.service.JobService;
 import uk.gov.ofwat.jobber.service.JobServiceProperties;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @Transactional
 @SpringBootTest
-public class JobberServiceUpdateJobsIntTest {
+public class JobberServiceUpdateStatusJobsIntTest {
 
-    Logger logger = LoggerFactory.getLogger(JobberServiceUpdateJobsIntTest.class);
+    Logger logger = LoggerFactory.getLogger(JobberServiceUpdateStatusJobsIntTest.class);
 
     @Autowired
     JobService jobService;
@@ -100,13 +100,13 @@ public class JobberServiceUpdateJobsIntTest {
         Job retrievedJob;
         JobInformation jobInformation;
         When:{
-            jobInformation = new JobInformation.Builder(JobTargetConstants.FOUNTAIN).build();
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.FOUNTAIN).build();
             job = jobService.createJob(jobInformation);
             retrievedJob = (Job)jobBaseRepository.getOne(job.getId());
         }
         Then:{
             assertThat(job.getTarget(), notNullValue());
-            assertThat(job.getTarget().getName(), is(JobTargetConstants.FOUNTAIN));
+            assertThat(job.getTarget().getName(), is(JobTargetPlatformConstants.FOUNTAIN));
         }
     }
 
@@ -116,13 +116,13 @@ public class JobberServiceUpdateJobsIntTest {
         Job retrievedJob;
         JobInformation jobInformation;
         When:{
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS).originator(JobTargetConstants.FOUNTAIN).build();
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS).originator(JobTargetPlatformConstants.FOUNTAIN).build();
             job = jobService.createJob(jobInformation);
             retrievedJob = (Job)jobBaseRepository.getOne(job.getId());
         }
         Then:{
             assertThat(job.getOriginator(), notNullValue());
-            assertThat(job.getOriginator().getName(), is(JobTargetConstants.FOUNTAIN));
+            assertThat(job.getOriginator().getName(), is(JobTargetPlatformConstants.FOUNTAIN));
         }
     }
 
@@ -138,7 +138,7 @@ public class JobberServiceUpdateJobsIntTest {
         }
         Then:{
             assertThat(job.getTarget(), notNullValue());
-            assertThat(job.getTarget().getName(), is(JobTargetConstants.DCS));
+            assertThat(job.getTarget().getName(), is(JobTargetPlatformConstants.DCS));
         }
     }
 
@@ -181,7 +181,9 @@ public class JobberServiceUpdateJobsIntTest {
     };
 
     private Job createUpdateJob(){
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_JOB).build();
+        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget())
+                .setMetaData(new HashMap<String, String>(){{put("targetJobStatus", JobStatusConstants.RESPONSE_SUCCESS);}{put("targetJobUuid",UUID.randomUUID().toString());}})                .type(JobTypeConstants.UPDATE_STATUS_JOB)
+                .build();
         Job updateJob = jobService.createJob(jobInformation);
         return updateJob;
     };

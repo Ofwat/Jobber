@@ -12,9 +12,9 @@ public class JobInformation {
     private final String originatorPlatform;
     private final String targetPlatform;
     private final HashMap<String, String> metadata;
-    private final String targetJobUuid;
+    //private final String targetJobUuid;
     private final String originatorJobUuid;
-    private final String targetJobNewStatus;
+    //private final String targetJobNewStatus;
 
 
     private JobInformation(Builder builder){
@@ -23,8 +23,8 @@ public class JobInformation {
         originatorPlatform = builder.originatorPlatform;
         targetPlatform = builder.targetPlatform;
         metadata = builder.metadata;
-        targetJobUuid = builder.targetJobUuid;
-        targetJobNewStatus = builder.targetJobNewStatus;
+/*        targetJobUuid = builder.targetJobUuid;
+        targetJobNewStatus = builder.targetJobNewStatus;*/
         originatorJobUuid = builder.originatorJobUuid;
     }
 
@@ -34,9 +34,9 @@ public class JobInformation {
         private String data = "";
         private String originatorPlatform = "";
         private final String targetPlatform;
-        private String targetJobUuid = "";
+        //private String targetJobUuid = "";
         private String originatorJobUuid = "";
-        private String targetJobNewStatus = "";
+        //private String targetJobNewStatus = "";
 
         private HashMap<String, String> metadata = new HashMap<String, String>();
 
@@ -69,20 +69,20 @@ public class JobInformation {
             return this;
         }
 
-        public Builder targetJobUuid(String targetJobUuid){
+/*        public Builder targetJobUuid(String targetJobUuid){
             this.targetJobUuid = targetJobUuid;
             return this;
-        }
+        }*/
 
         public Builder originatorJobUuid(String originatorJobUuid){
             this.originatorJobUuid = originatorJobUuid;
             return this;
         }
 
-        public Builder tartgetJobNewStatus(String targetJobNewStatus){
+/*        public Builder tartgetJobNewStatus(String targetJobNewStatus){
             this.targetJobNewStatus = targetJobNewStatus;
             return this;
-        }
+        }*/
 
         public JobInformation build(){
             return new JobInformation(this);
@@ -109,15 +109,15 @@ public class JobInformation {
         return metadata;
     }
 
-    public String getTargetJobUuid() {
+/*    public String getTargetJobUuid() {
         return targetJobUuid;
-    }
+    }*/
 
     public String getOriginatorJobUuid() {
         return originatorJobUuid;
     }
 
-    public String getTargetJobNewStatus() {
+/*    public String getTargetJobNewStatus() {
         return targetJobNewStatus;
-    }
+    }*/
 }

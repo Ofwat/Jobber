@@ -2,7 +2,6 @@ package uk.gov.ofwat.jobber.JobberResource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.TypeRef;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +23,10 @@ import uk.gov.ofwat.jobber.Application;
 import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.factory.AbstractJobFactory;
-import uk.gov.ofwat.jobber.domain.factory.UpdateJobFactory;
+import uk.gov.ofwat.jobber.domain.factory.UpdateStatusJobFactory;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
 import uk.gov.ofwat.jobber.repository.JobTargetRepository;
@@ -41,11 +40,11 @@ import uk.gov.ofwat.jobber.web.rest.errors.JobberExceptionTranslator;
 import javax.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -122,10 +121,10 @@ public class JobberResourceIntTest {
     @Transactional
     public void listJobs() throws Exception {
 
-        Job job1 = createUnprocessedJob();
-        Job job2 = createUnprocessedJob();
-        Job job3 = createUnprocessedJob();
-        Job job4 = createUnprocessedJob();
+        Job job1 = createUnprocessedJob(jobServiceProperties.getDefaultTarget());
+        Job job2 = createUnprocessedJob(jobServiceProperties.getDefaultTarget());
+        Job job3 = createUnprocessedJob(jobServiceProperties.getDefaultTarget());
+        Job job4 = createUnprocessedJob(jobServiceProperties.getDefaultTarget());
         Job job5 = createUpdateJob();
 
         MvcResult result = restJobberMockMvc.perform(get("/jobber/jobs"))
@@ -145,17 +144,40 @@ public class JobberResourceIntTest {
 
     @Test
     @Transactional
-    public void shouldGetNextJob() throws Exception{
-        Job job1 = createUnprocessedJob();
-        Job job2 = createUnprocessedJob();
-        Job job3 = createUnprocessedJob();
-        Job job4 = createUnprocessedJob();
-        String target = jobServiceProperties.getDefaultTarget();
+    public void shouldGetNextJobForFountain() throws Exception{
+        String target = JobTargetPlatformConstants.FOUNTAIN;
+        Job job1 = createUnprocessedJob(JobTargetPlatformConstants.DCS);
+        Job job2 = createUnprocessedJob(target);
+        Job job3 = createUnprocessedJob(target);
+        Job job4 = createUnprocessedJob(target);
 
         MvcResult result = restJobberMockMvc.perform(get("/jobber/jobs/next?target=" + target))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.uuid", Matchers.equalTo(job1.getUuid().toString())))
+                .andExpect(jsonPath("$.uuid", Matchers.equalTo(job2.getUuid().toString())))
+                .andReturn();
+
+        log.info(result.getResponse().getContentAsString());
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        Job job = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<Job>(){});
+        log.info(String.valueOf(job.getUuid().toString()));
+
+    }
+
+    @Test
+    @Transactional
+    public void shouldGetNextJobForDcs() throws Exception{
+        String target = JobTargetPlatformConstants.DCS;
+        Job job1 = createUnprocessedJob(JobTargetPlatformConstants.FOUNTAIN);
+        Job job2 = createUnprocessedJob(target);
+        Job job3 = createUnprocessedJob(target);
+        Job job4 = createUnprocessedJob(target);
+
+        MvcResult result = restJobberMockMvc.perform(get("/jobber/jobs/next?target=" + target))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.uuid", Matchers.equalTo(job2.getUuid().toString())))
                 .andReturn();
 
         log.info(result.getResponse().getContentAsString());
@@ -173,13 +195,15 @@ public class JobberResourceIntTest {
         HashMap<String, String> metaData = new HashMap<String, String>(){{
             put("key1","val1");
             put("key2","val2");
+            put("targetJobStatus", JobStatusConstants.RESPONSE_SUCCESS);
+            put("targetJobUuid",UUID.randomUUID().toString());
             put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_PROCESSING);}};
-        AbstractJobFactory jobFactory = new UpdateJobFactory(jobTypeRepository, jobStatusRepository);
-        JobInformation jobInformation = new JobInformation.Builder(JobTargetConstants.DCS)
+        AbstractJobFactory jobFactory = new UpdateStatusJobFactory(jobTypeRepository, jobStatusRepository);
+        JobInformation jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS)
                 .setMetaData(metaData)
                 .build();
         Job job = jobFactory.createNewJob(jobInformation);
-        job.setTarget(jobTargetRepository.findByName(JobTargetConstants.DCS).get());
+        job.setTarget(jobTargetRepository.findByName(JobTargetPlatformConstants.DCS).get());
         job.setNickname("TEST_JOB");
 
         // Create the Job
@@ -204,8 +228,8 @@ public class JobberResourceIntTest {
 
     }
 
-    private Job createProcessedJob(){
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();
+    private Job createProcessedJob(String target){
+        JobInformation jobInformation = new JobInformation.Builder(target).build();
         Job job = jobService.createJob(jobInformation);
         JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get();
         job.setJobStatus(jobStatus);
@@ -213,13 +237,18 @@ public class JobberResourceIntTest {
         return job;
     };
 
-    private Job createUnprocessedJob(){
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).build();
+    private Job createUnprocessedJob(String target){
+        JobInformation jobInformation = new JobInformation.Builder(target).build();
         return jobService.createJob(jobInformation);
     };
 
     private Job createUpdateJob(){
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_JOB).build();
+        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget())
+                .type(JobTypeConstants.UPDATE_STATUS_JOB)
+                .setMetaData(new HashMap<String, String>(){
+                    {put("targetJobStatus", JobStatusConstants.RESPONSE_SUCCESS);}
+                    {put("targetJobUuid",UUID.randomUUID().toString());}})
+                .build();
         Job updateJob = jobService.createJob(jobInformation);
         return updateJob;
     };

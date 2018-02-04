@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.jobs.DataJob;
 import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
-import uk.gov.ofwat.jobber.domain.jobs.UpdateJob;
+import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
@@ -156,8 +156,8 @@ public class JobberServiceCreateJobsIntTest {
         DataJob retrievedJob;
         JobInformation jobInformation;
         Given:{
-            jobInformation = new JobInformation.Builder(JobTargetConstants.FOUNTAIN)
-                    .originator(JobTargetConstants.DCS)
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.FOUNTAIN)
+                    .originator(JobTargetPlatformConstants.DCS)
                     .type(JobTypeConstants.DATA_JOB)
                     .addMetaData("fountainReportId", fountainReportId)
                     .addMetaData("companyId", companyId)
@@ -184,16 +184,16 @@ public class JobberServiceCreateJobsIntTest {
     public void shouldCreateAndProcessAnUpdateJob(){
         RequestValidationJob requestJob;
         RequestValidationJob retrievedRequestJob;
-        UpdateJob updateJob;
-        UpdateJob retrievedUpdateJob;
+        UpdateStatusJob updateStatusJob;
+        UpdateStatusJob retrievedUpdateStatusJob;
         UUID targetJobUuid;
         JobStatus expectedRequestJobStatus;
         JobStatus originalRequestJobStatus;
         JobStatus originalUpdateJobStatus;
         JobStatus expectedUpdateJobStatus;
         HashMap<String, String> updateMetadata;
-        String targetPlatform = JobTargetConstants.DCS;
-        String originatorPlatform = JobTargetConstants.FOUNTAIN;
+        String targetPlatform = JobTargetPlatformConstants.DCS;
+        String originatorPlatform = JobTargetPlatformConstants.FOUNTAIN;
         UUID originatorJobUuid = UUID.randomUUID();
         Given:{
             //Create requestJob
@@ -212,24 +212,24 @@ public class JobberServiceCreateJobsIntTest {
         }
         When:{
             //Create the update job
-            updateJob = jobService.createUpdateJob(targetJobUuid, targetPlatform, expectedRequestJobStatus, updateMetadata);
-            originalUpdateJobStatus = updateJob.getJobStatus();
+            updateStatusJob = jobService.createUpdateJob(targetJobUuid, targetPlatform, expectedRequestJobStatus, updateMetadata);
+            originalUpdateJobStatus = updateStatusJob.getJobStatus();
             //Process it.
             jobService.processNextJob();
             //Get the updated request job back again.
             retrievedRequestJob = (RequestValidationJob) jobService.getJobByUuid(requestJob.getUuid()).get();
             //Get the processed update job back again.
-            retrievedUpdateJob = (UpdateJob) jobService.getJobByUuid(updateJob.getUuid()).get();
+            retrievedUpdateStatusJob = (UpdateStatusJob) jobService.getJobByUuid(updateStatusJob.getUuid()).get();
         }
         Then:{
             //Check the request status has changed.
             assertNotNull(retrievedRequestJob);
-            assertNotNull(retrievedUpdateJob);
+            assertNotNull(retrievedUpdateStatusJob);
             assertThat(retrievedRequestJob.getJobStatus(), is(expectedRequestJobStatus));
             //Check the request job has the updated metadata.
             Map<String, String> retrievedMetadata = retrievedRequestJob.getMetadata();
             //Check that the updateJobStatus has changed.
-            assertThat(retrievedUpdateJob.getJobStatus(), is(expectedUpdateJobStatus));
+            assertThat(retrievedUpdateStatusJob.getJobStatus(), is(expectedUpdateJobStatus));
         }
     }
 

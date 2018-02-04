@@ -6,4 +6,4 @@ id;name
 5;DefaultJob
 6;RequestValidationJob
 7;ResponseValidationJob
-8;UpdateJob
+8;UpdateStatusJob

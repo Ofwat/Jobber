@@ -14,7 +14,7 @@ public class JobTypeConstants {
 
     public static final String RESPONSE_VALIDATION_JOB = "ResponseValidationJob";
 
-    public static final String UPDATE_JOB = "UpdateJob";
+    public static final String UPDATE_STATUS_JOB = "UpdateStatusJob";
 
     private JobTypeConstants(){}
 

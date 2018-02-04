@@ -17,9 +17,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobStatus;
-import uk.gov.ofwat.jobber.domain.JobType;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
@@ -27,7 +26,7 @@ import uk.gov.ofwat.jobber.repository.JobTypeRepository;
 import uk.gov.ofwat.jobber.service.JobInformation;
 import uk.gov.ofwat.jobber.service.JobService;
 import uk.gov.ofwat.jobber.service.JobServiceProperties;
-import static org.hamcrest.CoreMatchers.*;
+
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
@@ -173,14 +172,14 @@ public class JobberServiceQueryJobsIntTest {
         Job unprocessedJob;
         Optional<Job> myNextJob;
         Given:{
-            nextProcessedJobForMe = createProcessedJob(JobTargetConstants.DCS);
-            nextUnProcessedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
-            processedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
-            anotherProcessedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
-            processedJobNotForMe = createUnprocessedJob(JobTargetConstants.DCS);
+            nextProcessedJobForMe = createProcessedJob(JobTargetPlatformConstants.DCS);
+            nextUnProcessedJobForMe = createUnprocessedJob(JobTargetPlatformConstants.DCS);
+            processedJobForMe = createUnprocessedJob(JobTargetPlatformConstants.DCS);
+            anotherProcessedJobForMe = createUnprocessedJob(JobTargetPlatformConstants.DCS);
+            processedJobNotForMe = createUnprocessedJob(JobTargetPlatformConstants.DCS);
         }
         When:{
-            myNextJob = jobService.getNextJobForTarget(JobTargetConstants.DCS);
+            myNextJob = jobService.getNextJobForTarget(JobTargetPlatformConstants.DCS);
         }
         Then:{
             assertEquals(myNextJob.get().getUuid(), nextUnProcessedJobForMe.getUuid());
@@ -211,7 +210,7 @@ public class JobberServiceQueryJobsIntTest {
     ;
 
     private Job createUpdateJob() {
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_JOB).build();
+        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_STATUS_JOB).build();
         Job updateJob = jobService.createJob(jobInformation);
         return updateJob;
     };

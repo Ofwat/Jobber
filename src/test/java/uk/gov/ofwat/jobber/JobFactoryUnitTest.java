@@ -9,7 +9,7 @@ import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobStatus;
 import uk.gov.ofwat.jobber.domain.JobType;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.factory.*;
 import uk.gov.ofwat.jobber.domain.jobs.DataJob;
@@ -19,6 +19,7 @@ import uk.gov.ofwat.jobber.service.JobInformation;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -41,14 +42,14 @@ public class JobFactoryUnitTest {
         JobType gnjt = new JobType(JobTypeConstants.GET_NEW_JOB);
         JobType reqvjt = new JobType(JobTypeConstants.REQUEST_VALIDATION_JOB);
         JobType resvt = new JobType(JobTypeConstants.RESPONSE_VALIDATION_JOB);
-        JobType ut = new JobType(JobTypeConstants.UPDATE_JOB);
+        JobType ut = new JobType(JobTypeConstants.UPDATE_STATUS_JOB);
         JobType dj = new JobType(JobTypeConstants.DEFAULT_JOB);
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.QUERY_JOB_STATUS)).thenReturn(Optional.of(qjt));
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.DATA_JOB)).thenReturn(Optional.of(djt));
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.GET_NEW_JOB)).thenReturn(Optional.of(gnjt));
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.REQUEST_VALIDATION_JOB)).thenReturn(Optional.of(reqvjt));
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.RESPONSE_VALIDATION_JOB)).thenReturn(Optional.of(resvt));
-        Mockito.when(jobTypeRepository.findByName(JobTypeConstants.UPDATE_JOB)).thenReturn(Optional.of(ut));
+        Mockito.when(jobTypeRepository.findByName(JobTypeConstants.UPDATE_STATUS_JOB)).thenReturn(Optional.of(ut));
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.DEFAULT_JOB)).thenReturn(Optional.of(dj));
 
         JobStatus rsjs = new JobStatus(JobStatusConstants.RESPONSE_SUCCESS);
@@ -77,7 +78,7 @@ public class JobFactoryUnitTest {
         AbstractJobFactory jobFactory;
         JobInformation jobInformation;
         Given:{
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS).type(JobTypeConstants.QUERY_JOB_STATUS).build();
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS).type(JobTypeConstants.QUERY_JOB_STATUS).build();
             jobFactory = new QueryJobFactory(jobTypeRepository);
         }
         When:{
@@ -104,7 +105,7 @@ public class JobFactoryUnitTest {
             metaData.put("auditComment", auditComment);
             metaData.put("runId", runId);
             metaData.put("excelDocMongoId", excelDocMongoId);
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS)
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS)
                     .setMetaData(metaData)
                     .type(JobTypeConstants.DATA_JOB)
                     .build();
@@ -130,7 +131,7 @@ public class JobFactoryUnitTest {
         JobInformation jobInformation;
         Given:{
             jobFactory = new GetNewJobFactory(jobTypeRepository);
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS).type(JobTypeConstants.GET_NEW_JOB).build();
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS).type(JobTypeConstants.GET_NEW_JOB).build();
         }
         When:{
             job = jobFactory.createNewJob(jobInformation);
@@ -146,7 +147,7 @@ public class JobFactoryUnitTest {
         AbstractJobFactory jobFactory;
         JobInformation jobInformation;
         Given:{
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS).type(JobTypeConstants.REQUEST_VALIDATION_JOB).build();
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS).type(JobTypeConstants.REQUEST_VALIDATION_JOB).build();
             jobFactory = new RequestValidationJobFactory(jobTypeRepository);
         }
         When:{
@@ -164,7 +165,7 @@ public class JobFactoryUnitTest {
         JobInformation jobInformation;
         Given:{
             jobFactory = new ResponseValidationJobFactory(jobTypeRepository);
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS).type(JobTypeConstants.RESPONSE_VALIDATION_JOB).build();
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS).type(JobTypeConstants.RESPONSE_VALIDATION_JOB).build();
         }
         When:{
             job = jobFactory.createNewJob(jobInformation);
@@ -180,14 +181,18 @@ public class JobFactoryUnitTest {
         AbstractJobFactory jobFactory;
         JobInformation jobInformation;
         Given:{
-            jobFactory = new UpdateJobFactory(jobTypeRepository, jobStatusRepository);
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS).type(JobTypeConstants.UPDATE_JOB).build();
+            jobFactory = new UpdateStatusJobFactory(jobTypeRepository, jobStatusRepository);
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS)
+                    .type(JobTypeConstants.UPDATE_STATUS_JOB)
+                    .setMetaData(new HashMap<String, String>(){{put("targetJobStatus", JobStatusConstants.RESPONSE_SUCCESS);}{put("targetJobUuid",UUID.randomUUID().toString());}})
+                    //.targetJobUuid(UUID.randomUUID().toString())
+                    .build();
         }
         When:{
             job = jobFactory.createNewJob(jobInformation);
         }
         Then:{
-            assertThat(job.getJobType().getName().equals(JobTypeConstants.UPDATE_JOB), is(true));
+            assertThat(job.getJobType().getName().equals(JobTypeConstants.UPDATE_STATUS_JOB), is(true));
         }
     };
 
@@ -198,7 +203,7 @@ public class JobFactoryUnitTest {
         JobInformation jobInformation;
         Given:{
             jobFactory = new DefaultJobFactory(jobTypeRepository);
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS).type(JobTypeConstants.DEFAULT_JOB).build();
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS).type(JobTypeConstants.DEFAULT_JOB).build();
         }
         When:{
             job = jobFactory.createNewJob(jobInformation);

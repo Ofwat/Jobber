@@ -6,11 +6,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 import uk.gov.ofwat.jobber.domain.*;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.factory.*;
+import uk.gov.ofwat.jobber.domain.jobs.DataJob;
 import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
 import uk.gov.ofwat.jobber.domain.jobs.ResponseValidationJob;
-import uk.gov.ofwat.jobber.domain.jobs.UpdateJob;
+import uk.gov.ofwat.jobber.domain.jobs.UpdateStatusJob;
 import uk.gov.ofwat.jobber.domain.strategy.ProcessDataJob;
 import uk.gov.ofwat.jobber.domain.strategy.ProcessJob;
 import uk.gov.ofwat.jobber.domain.strategy.ProcessUpdateJob;
@@ -137,8 +139,8 @@ public class JobService {
             case JobTypeConstants.RESPONSE_VALIDATION_JOB:
                 factory = new ResponseValidationJobFactory(jobTypeRepository);
                 break;
-            case JobTypeConstants.UPDATE_JOB:
-                factory = new UpdateJobFactory(jobTypeRepository, jobStatusRepository);
+            case JobTypeConstants.UPDATE_STATUS_JOB:
+                factory = new UpdateStatusJobFactory(jobTypeRepository, jobStatusRepository);
                 break;
             default:
                 factory = new DefaultJobFactory(jobTypeRepository);
@@ -222,18 +224,37 @@ public class JobService {
         return job;
     }
 
-    public UpdateJob createUpdateJob(UUID uuid, String target, JobStatus jobStatus, HashMap<String, String> metadata){
+    public UpdateStatusJob createUpdateJob(UUID targetJobUuid, String jobTargetPlatform, JobStatus targetJobNewStatus, HashMap<String, String> metadata){
         //Todo the metadata bit will only work with the dataJobs at the moment.
-        JobInformation jobInformation = new JobInformation.Builder(target)
-                .type(JobTypeConstants.UPDATE_JOB)
+        metadata.put("targetJobUuid",targetJobUuid.toString());
+        metadata.put("targetJobStatus", targetJobNewStatus.getName());
+        JobInformation jobInformation = new JobInformation.Builder(jobTargetPlatform)
+                .type(JobTypeConstants.UPDATE_STATUS_JOB)
                 .originator(jobServiceProperties.getWhoAmI())
                 .setMetaData(metadata)
-                .targetJobUuid(uuid.toString())
-                .tartgetJobNewStatus(jobStatus.getName())
                 .build();
-        UpdateJob job = (UpdateJob) createJob(jobInformation);
-        job.setTargetJobUuid(uuid);
+        UpdateStatusJob job = (UpdateStatusJob) createJob(jobInformation);
         return job;
+    }
+
+    public DataJob createFountainReportDataJob(String data, Long fountainReportId, Long companyId, String auditComment, Long runId){
+        HashMap<String, String> metaData = new HashMap<String, String>();
+        metaData.put("fountainReportId", fountainReportId.toString());
+        metaData.put("companyId", companyId.toString());
+        metaData.put("auditComment", auditComment);
+        metaData.put("runId", runId.toString());
+        metaData.put("excelDocMongoId", "");
+        return creatDataJob(JobTargetPlatformConstants.FOUNTAIN, metaData, data);
+    }
+
+    public DataJob creatDataJob(String jobTargetPlatform, HashMap<String, String> metadata, String data){
+        JobInformation jobInformation = new JobInformation.Builder(jobTargetPlatform)
+                .originator(JobTargetPlatformConstants.DCS)
+                .type(JobTypeConstants.DATA_JOB)
+                .setMetaData(metadata)
+                .data(data)
+                .build();
+        return (DataJob) createJob(jobInformation);
     }
 
     public Optional<Job> processNextJob(){
@@ -271,7 +292,7 @@ public class JobService {
             case JobTypeConstants.DATA_JOB:
                 processJob = new ProcessDataJob(this, jobStatusRepository, jobBaseRepository);
                 break;
-            case JobTypeConstants.UPDATE_JOB:
+            case JobTypeConstants.UPDATE_STATUS_JOB:
                 processJob = new ProcessUpdateJob(this, jobStatusRepository, jobBaseRepository);
                 break;
             default:

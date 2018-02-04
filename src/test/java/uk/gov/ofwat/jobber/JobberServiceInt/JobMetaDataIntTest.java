@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
 import uk.gov.ofwat.jobber.service.JobInformation;
@@ -47,7 +47,7 @@ public class JobMetaDataIntTest {
                 put("key2", "val2");
                 };
             };
-            jobInformation = new JobInformation.Builder(JobTargetConstants.DCS)
+            jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS)
                     .setMetaData(metadata)
                     .build();
         }

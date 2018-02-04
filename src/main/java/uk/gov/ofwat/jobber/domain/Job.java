@@ -1,13 +1,16 @@
 package uk.gov.ofwat.jobber.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.jobs.*;
 
 import javax.persistence.*;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -20,7 +23,7 @@ import java.util.UUID;
     property = "kind"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = UpdateJob.class, name = "UpdateJob.KIND"),
+        @JsonSubTypes.Type(value = UpdateStatusJob.class, name = "UpdateStatusJob.KIND"),
         @JsonSubTypes.Type(value = DefaultJob.class, name = "DefaultJob.KIND"),
         @JsonSubTypes.Type(value = DataJob.class, name = "DataJob.KIND"),
         @JsonSubTypes.Type(value = QueryJob.class, name = "QueryJob.KIND"),
@@ -147,6 +150,17 @@ public abstract class Job extends AbstractJobAuditingEntity{
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    @JsonIgnore
+    public Optional<UUID> getLinkedJobUuid(){
+        Optional<UUID> optionalUuid = Optional.empty();
+        for(Map.Entry<String, String> entry : metadata.entrySet()) {
+            if(entry.getKey().equals(JobStatusConstants.LINKED_JOB_KEY)){
+                optionalUuid = (Optional<UUID>) Optional.of(UUID.fromString(entry.getValue()));
+            }
+        };
+        return optionalUuid;
     }
 
     @Override

@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -15,7 +14,7 @@ import uk.gov.ofwat.jobber.domain.Job;
 import uk.gov.ofwat.jobber.domain.JobListener;
 import uk.gov.ofwat.jobber.domain.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
-import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
+import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
@@ -69,7 +68,7 @@ public class JobListenerIntTest {
             testJobListener = (TestJobListener) jobService.addJobListener(testJobListener);
         }
         When:{
-            updateJob = jobService.createUpdateJob(job2.getUuid(), JobTargetConstants.DCS, jobStatus, metadata);
+            updateJob = jobService.createUpdateJob(job2.getUuid(), JobTargetPlatformConstants.DCS, jobStatus, metadata);
             //TODO Do the process.
             Optional<Job> job = jobService.processNextJob();
         }
@@ -144,7 +143,7 @@ public class JobListenerIntTest {
     };
 
     private Job createUpdateJob(){
-        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_JOB).build();
+        JobInformation jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).type(JobTypeConstants.UPDATE_STATUS_JOB).build();
         Job updateJob = jobService.createJob(jobInformation);
         return updateJob;
     };
