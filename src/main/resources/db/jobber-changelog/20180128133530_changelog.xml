@@ -16,10 +16,10 @@
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="jobber_jobPK"/>
             </column>
-            <column name="created_date" type="timestamp" defaultValueDate="${now}">
+            <column name="created_date" type="binary" defaultValueDate="${now}">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_modified_date" type="timestamp"/>
+            <column name="last_modified_date" type="binary"/>
             <column name="retry_count" type="BIGINT"/>
             <column name="uuid" type="BINARY"/>
             <column name="job_data_id" type="BIGINT"/>
@@ -133,4 +133,26 @@
     <changeSet author="jtodd (generated)" id="1517146534938-17">
         <addForeignKeyConstraint baseColumnNames="job_id" baseTableName="jobber_job_data" constraintName="FKiqkx22ehfo4ry1okj3ouio1n7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="jobber_job"/>
     </changeSet>
+
+    <changeSet author="jtodd (generated)" id="1517669222329-1">
+        <createTable tableName="jobber_job_metadata">
+            <column name="job_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="metadata" type="VARCHAR(255)"/>
+            <column name="metadata_key" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="jtodd (generated)" id="1517669222329-2">
+        <addPrimaryKey columnNames="job_id, metadata_key" tableName="jobber_job_metadata"/>
+    </changeSet>
+
+    <changeSet author="jtodd (generated)" id="1517669222329-3">
+        <addForeignKeyConstraint baseColumnNames="job_id" baseTableName="jobber_job_metadata" constraintName="FKcdtwep4oqlyemct7ln1yvmj8y" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="jobber_job"/>
+    </changeSet>
+
+
 </databaseChangeLog>

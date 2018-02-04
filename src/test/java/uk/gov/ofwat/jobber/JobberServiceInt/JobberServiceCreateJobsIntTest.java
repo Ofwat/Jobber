@@ -13,10 +13,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ofwat.jobber.domain.Job;
+import uk.gov.ofwat.jobber.domain.JobStatus;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.jobs.DataJob;
+import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
+import uk.gov.ofwat.jobber.domain.jobs.UpdateJob;
 import uk.gov.ofwat.jobber.repository.JobBaseRepository;
 import uk.gov.ofwat.jobber.repository.JobStatusRepository;
 import uk.gov.ofwat.jobber.repository.JobTypeRepository;
@@ -29,10 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 
@@ -139,7 +145,7 @@ public class JobberServiceCreateJobsIntTest {
     }
 
     @Test
-    public void shouldCreateDataJobWithMEtaData(){
+    public void shouldCreateDataJobWithMetaData(){
         HashMap<String, String> metaData = new HashMap<String, String>();
         String fountainReportId = "999";
         String companyId = "123";
@@ -173,4 +179,59 @@ public class JobberServiceCreateJobsIntTest {
             assertThat(retrievedJob.getJobType().getName().equals(JobTypeConstants.DATA_JOB), is(true));
         }
     }
+
+    @Test
+    public void shouldCreateAndProcessAnUpdateJob(){
+        RequestValidationJob requestJob;
+        RequestValidationJob retrievedRequestJob;
+        UpdateJob updateJob;
+        UpdateJob retrievedUpdateJob;
+        UUID targetJobUuid;
+        JobStatus expectedRequestJobStatus;
+        JobStatus originalRequestJobStatus;
+        JobStatus originalUpdateJobStatus;
+        JobStatus expectedUpdateJobStatus;
+        HashMap<String, String> updateMetadata;
+        String targetPlatform = JobTargetConstants.DCS;
+        String originatorPlatform = JobTargetConstants.FOUNTAIN;
+        UUID originatorJobUuid = UUID.randomUUID();
+        Given:{
+            //Create requestJob
+            requestJob = jobService.createDataValidationRequest(unencodedJson);
+            //Process it!
+            jobService.processNextJob();
+            targetJobUuid = requestJob.getUuid();
+            //Make a note of it's status
+            originalRequestJobStatus = jobService.getJobByUuid(requestJob.getUuid()).get().getJobStatus();
+            //The status that the jobs *should* go to.
+            expectedRequestJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PROCESSING).get();
+            expectedUpdateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get();
+            //The metadata the reques job should have.
+            updateMetadata = new HashMap<String, String>(){{put("dataKey1", "dataValue1");
+                put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_PROCESSING);}};
+        }
+        When:{
+            //Create the update job
+            updateJob = jobService.createUpdateJob(targetJobUuid, targetPlatform, expectedRequestJobStatus, updateMetadata);
+            originalUpdateJobStatus = updateJob.getJobStatus();
+            //Process it.
+            jobService.processNextJob();
+            //Get the updated request job back again.
+            retrievedRequestJob = (RequestValidationJob) jobService.getJobByUuid(requestJob.getUuid()).get();
+            //Get the processed update job back again.
+            retrievedUpdateJob = (UpdateJob) jobService.getJobByUuid(updateJob.getUuid()).get();
+        }
+        Then:{
+            //Check the request status has changed.
+            assertNotNull(retrievedRequestJob);
+            assertNotNull(retrievedUpdateJob);
+            assertThat(retrievedRequestJob.getJobStatus(), is(expectedRequestJobStatus));
+            //Check the request job has the updated metadata.
+            Map<String, String> retrievedMetadata = retrievedRequestJob.getMetadata();
+            //Check that the updateJobStatus has changed.
+            assertThat(retrievedUpdateJob.getJobStatus(), is(expectedUpdateJobStatus));
+        }
+    }
+
+
 }

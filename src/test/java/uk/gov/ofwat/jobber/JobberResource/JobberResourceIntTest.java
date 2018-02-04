@@ -44,6 +44,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -143,30 +145,63 @@ public class JobberResourceIntTest {
 
     @Test
     @Transactional
+    public void shouldGetNextJob() throws Exception{
+        Job job1 = createUnprocessedJob();
+        Job job2 = createUnprocessedJob();
+        Job job3 = createUnprocessedJob();
+        Job job4 = createUnprocessedJob();
+        String target = jobServiceProperties.getDefaultTarget();
+
+        MvcResult result = restJobberMockMvc.perform(get("/jobber/jobs/next?target=" + target))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.uuid", Matchers.equalTo(job1.getUuid().toString())))
+                .andReturn();
+
+        log.info(result.getResponse().getContentAsString());
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        Job job = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<Job>(){});
+        log.info(String.valueOf(job.getUuid().toString()));
+
+    }
+
+    @Test
+    @Transactional
     public void createJob() throws Exception {
         int databaseSizeBeforeCreate = jobBaseRepository.findAll().size();
-        HashMap<String, String> metaData = new HashMap<String, String>();
-        AbstractJobFactory jobFactory = new UpdateJobFactory(jobTypeRepository);
-        Job job = jobFactory.createNewJob(metaData);
+        HashMap<String, String> metaData = new HashMap<String, String>(){{
+            put("key1","val1");
+            put("key2","val2");
+            put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_PROCESSING);}};
+        AbstractJobFactory jobFactory = new UpdateJobFactory(jobTypeRepository, jobStatusRepository);
+        JobInformation jobInformation = new JobInformation.Builder(JobTargetConstants.DCS)
+                .setMetaData(metaData)
+                .build();
+        Job job = jobFactory.createNewJob(jobInformation);
         job.setTarget(jobTargetRepository.findByName(JobTargetConstants.DCS).get());
         job.setNickname("TEST_JOB");
 
         // Create the Job
-        restJobberMockMvc.perform(post("/jobber/createJob")
+        MvcResult result = restJobberMockMvc.perform(post("/jobber/createJob")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
                 .content(TestUtil.convertObjectToJsonBytes(job)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                //.andExpect(jsonPath("$.uuid", Matchers.equalTo(job.getUuid().toString())))
+                //.andExpect(jsonPath("$.metadata[0].key1", Matchers.equalTo(job.getMetadata().get("key1"))))
+                .andExpect(jsonPath("$.metadata.key1", Matchers.equalTo(job.getMetadata().get("key1"))))
+                .andReturn();
 
-        // Validate the Company in the database
-/*
-        List<Company> companyList = companyRepository.findAll();
-        assertThat(companyList).hasSize(databaseSizeBeforeCreate + 1);
-        Company testCompany = companyList.get(companyList.size() - 1);
-        assertThat(testCompany.getName()).isEqualTo(DEFAULT_NAME);
-        assertThat(testCompany.getDeleted()).isEqualTo(DEFAULT_DELETED);
-*/
+        log.info(result.getResponse().getContentAsString());
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        Job jobResponse = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<Job>(){});
+        log.info(String.valueOf(jobResponse.getUuid().toString()));
         List<Job> jobs = jobService.getAllJobs();
         assertThat(jobs.size()).isEqualTo(1);
+        assertEquals(jobResponse.getMetadata().get("key1"), metaData.get("key1"));
+
     }
 
     private Job createProcessedJob(){
@@ -188,6 +223,5 @@ public class JobberResourceIntTest {
         Job updateJob = jobService.createJob(jobInformation);
         return updateJob;
     };
-
 
 }

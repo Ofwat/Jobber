@@ -12,6 +12,14 @@ import java.util.Set;
 @Table(name = "jobber_job_status")
 public class JobStatus {
 
+    public JobStatus(String name){
+        this.name = name;
+    }
+
+    public JobStatus(){
+
+    }
+
     @Id
     private Long id;
 

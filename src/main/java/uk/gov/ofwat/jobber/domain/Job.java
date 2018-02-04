@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import uk.gov.ofwat.jobber.domain.jobs.*;
 
 import javax.persistence.*;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -58,6 +59,13 @@ public abstract class Job extends AbstractJobAuditingEntity{
     @Column(name = "nickname")
     private String nickname;
 
+    @ElementCollection(targetClass=java.lang.String.class)
+    @JoinTable(name="jobber_job_metadata",
+            joinColumns=@JoinColumn(name="job_id"))
+    @MapKeyColumn(name="metadata_key")
+    @Column(name="metadata")
+    private Map<String,String> metadata;
+
     public Long getId() {
         return id;
     };
@@ -74,6 +82,13 @@ public abstract class Job extends AbstractJobAuditingEntity{
         this.uuid = uuid;
         return uuid;
     };
+
+    public Map<String,String> getMetadata() {
+        return metadata;
+    }
+    public void setMetadata(Map<String,String> metadata) {
+        this.metadata = metadata;
+    }
 
     public void setJobType(JobType jobType){
         this.jobType = jobType;

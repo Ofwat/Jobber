@@ -113,14 +113,6 @@ public class JobberServiceQueryJobsIntTest {
     }
 
     @Test
-    public void shouldGetNextUnprocessedJobForMe(){
-        Given:{}
-        When:{}
-        Then:{}
-    }
-
-
-    @Test
     public void shouldGetAllUnprocessedJobs() {
         Job processedJob1;
         Job processedJob2;
@@ -174,13 +166,15 @@ public class JobberServiceQueryJobsIntTest {
     public void shouldGetTheNextJobForMeToProcess(){
         //Create some jobs.
         Job nextProcessedJobForMe;
+        Job nextUnProcessedJobForMe;
         Job processedJobForMe;
         Job anotherProcessedJobForMe;
         Job processedJobNotForMe;
         Job unprocessedJob;
         Optional<Job> myNextJob;
         Given:{
-            nextProcessedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
+            nextProcessedJobForMe = createProcessedJob(JobTargetConstants.DCS);
+            nextUnProcessedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
             processedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
             anotherProcessedJobForMe = createUnprocessedJob(JobTargetConstants.DCS);
             processedJobNotForMe = createUnprocessedJob(JobTargetConstants.DCS);
@@ -189,7 +183,7 @@ public class JobberServiceQueryJobsIntTest {
             myNextJob = jobService.getNextJobForTarget(JobTargetConstants.DCS);
         }
         Then:{
-            assertEquals(myNextJob.get().getUuid(), nextProcessedJobForMe.getUuid());
+            assertEquals(myNextJob.get().getUuid(), nextUnProcessedJobForMe.getUuid());
         }
     }
 

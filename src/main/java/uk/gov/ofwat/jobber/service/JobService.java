@@ -4,20 +4,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import uk.gov.ofwat.jobber.domain.*;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
 import uk.gov.ofwat.jobber.domain.factory.*;
 import uk.gov.ofwat.jobber.domain.jobs.RequestValidationJob;
 import uk.gov.ofwat.jobber.domain.jobs.ResponseValidationJob;
+import uk.gov.ofwat.jobber.domain.jobs.UpdateJob;
+import uk.gov.ofwat.jobber.domain.strategy.ProcessDataJob;
+import uk.gov.ofwat.jobber.domain.strategy.ProcessJob;
+import uk.gov.ofwat.jobber.domain.strategy.ProcessUpdateJob;
 import uk.gov.ofwat.jobber.repository.*;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 @ConfigurationProperties("jobServiceProperties")
 public class JobService {
+
+    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
+
+    protected final Lock readLock = readWriteLock.readLock();
+
+    protected final Lock writeLock = readWriteLock.writeLock();
 
     Logger logger = LoggerFactory.getLogger(JobService.class);
 
@@ -69,6 +81,7 @@ public class JobService {
         job = assignOriginator(job, jobInformation);
         job = assignData(job, jobInformation);
         job = assignJobStatus(job);
+        job.setMetadata(jobInformation.getMetadata());
         job.setUuid(UUID.randomUUID());
         job = (Job)jobBaseRepository.save(job);
         return job;
@@ -81,15 +94,15 @@ public class JobService {
     }
 
     private Job assignTarget(Job job, JobInformation jobInformation){
-        Target target = jobTargetRepository.findByName(jobInformation.getTarget()).get();
+        Target target = jobTargetRepository.findByName(jobInformation.getTargetPlatform()).get();
         job.setTarget(target);
         return job;
     }
 
     private Job assignOriginator(Job job, JobInformation jobInformation){
         String originatorName = jobServiceProperties.getWhoAmI();
-        if(jobInformation.getOriginator() != ""){
-            originatorName = jobInformation.getOriginator();
+        if(jobInformation.getOriginatorPlatform() != ""){
+            originatorName = jobInformation.getOriginatorPlatform();
         }
         Originator originator = jobOriginatorRepository.findByName(originatorName).get();
         job.setOriginator(originator);
@@ -108,7 +121,6 @@ public class JobService {
 
     private Job createJobFromFactory(JobInformation jobInformation){
         AbstractJobFactory factory;
-        HashMap<String, String> metaData =  jobInformation.getMetadata();
         switch (jobInformation.getType()) {
             case JobTypeConstants.QUERY_JOB_STATUS:
                 factory = new QueryJobFactory(jobTypeRepository);
@@ -126,13 +138,13 @@ public class JobService {
                 factory = new ResponseValidationJobFactory(jobTypeRepository);
                 break;
             case JobTypeConstants.UPDATE_JOB:
-                factory = new UpdateJobFactory(jobTypeRepository);
+                factory = new UpdateJobFactory(jobTypeRepository, jobStatusRepository);
                 break;
             default:
                 factory = new DefaultJobFactory(jobTypeRepository);
                 break;
         }
-        Job job = factory.createNewJob(metaData);
+        Job job = factory.createNewJob(jobInformation);
         return job;
     }
 
@@ -167,7 +179,7 @@ public class JobService {
         return jobBaseRepository.findByUuid(uuid);
     }
 
-    public Job updateJobStatus(String uuid, JobStatus jobStatus){
+    private Job updateJobStatus(String uuid, JobStatus jobStatus){
         UUID u = UUID.fromString(uuid);
         return updateJobStatus(u, jobStatus);
     }
@@ -210,17 +222,119 @@ public class JobService {
         return job;
     }
 
+    public UpdateJob createUpdateJob(UUID uuid, String target, JobStatus jobStatus, HashMap<String, String> metadata){
+        //Todo the metadata bit will only work with the dataJobs at the moment.
+        JobInformation jobInformation = new JobInformation.Builder(target)
+                .type(JobTypeConstants.UPDATE_JOB)
+                .originator(jobServiceProperties.getWhoAmI())
+                .setMetaData(metadata)
+                .targetJobUuid(uuid.toString())
+                .tartgetJobNewStatus(jobStatus.getName())
+                .build();
+        UpdateJob job = (UpdateJob) createJob(jobInformation);
+        job.setTargetJobUuid(uuid);
+        return job;
+    }
+
+    public Optional<Job> processNextJob(){
+        ProcessJob processJob;
+        List<Job> notifyJobs;
+        Optional<Job> job = getNextJobForMe();
+        if(job.isPresent()){
+            //Process the job.
+            Job j = job.get();
+            logger.info("Processing JOB with UUID: {} of type {} originated from {} and targeted to {} with id {}",
+                    j.getUuid().toString(),
+                    j.getJobType().getName(),
+                    j.getOriginator().getName(),
+                    j.getTarget().getName(),
+                    j.getId().toString());
+
+            processJob = getProcessJob(j.getJobType());
+            notifyJobs = processJob.process(j);
+            notifyListeners(notifyJobs);
+        }
+        return job;
+    }
+
+    private void notifyListeners(List<Job> notifyJobs){
+        notifyJobs.stream().forEachOrdered(updateJob -> {
+            updateJobListeners(updateJob);
+        });
+    }
+
+    private ProcessJob getProcessJob(JobType jobType){
+        //We need to have a strategy here
+        //Just deal with, updateJobs, dataJobs for the time being.
+        ProcessJob processJob;
+        switch (jobType.getName()){
+            case JobTypeConstants.DATA_JOB:
+                processJob = new ProcessDataJob(this, jobStatusRepository, jobBaseRepository);
+                break;
+            case JobTypeConstants.UPDATE_JOB:
+                processJob = new ProcessUpdateJob(this, jobStatusRepository, jobBaseRepository);
+                break;
+            default:
+                processJob = new ProcessUpdateJob(this, jobStatusRepository, jobBaseRepository);
+                break;
+        }
+        return processJob;
+    }
+
     /**
      * Add a listener for a job.
      * @param jobListener
      */
-    public void addJobListener(JobListener jobListener){
-        jobListeners.add(jobListener);
+    public JobListener addJobListener(JobListener jobListener){
+        this.writeLock.lock();
+        try {
+            // Add the listener to the list of registered listeners
+            this.jobListeners.add(jobListener);
+        }
+        finally {
+            // Unlock the writer lock
+            this.writeLock.unlock();
+        }
+        return jobListener;
+    }
+
+    public void removeJobListener(JobListener jobListener){
+        this.writeLock.lock();
+        try {
+            // Remove the listener from the list of registered listeners
+            this.jobListeners.remove(jobListener);
+        }
+        finally {
+            // Unlock the writer lock
+            this.writeLock.unlock();
+        }
+    }
+    public void removeAllJobListeners(){
+        this.writeLock.lock();
+        try {
+            this.jobListeners.clear();
+        }
+        finally {
+            // Unlock the writer lock
+            this.writeLock.unlock();
+        }
     }
 
     public void updateJobListeners(Job job){
-        jobListeners.stream().filter(jobListener -> jobListener.getUUID().equals(job.getUuid()))
-                .forEachOrdered(jobListener -> jobListener.update(job));
+        // Lock the list of listeners for reading
+        this.readLock.lock();
+        try {
+            // Notify each of the listeners in the list of registered listeners
+            this.jobListeners.forEach(jobListener -> {
+                if (jobListener.getUUID().equals(job.getUuid())){
+                    jobListener.update(job);
+                };
+            });
+        }
+        finally {
+            // Unlock the reader lock
+            this.readLock.unlock();
+        }
     }
 
 }

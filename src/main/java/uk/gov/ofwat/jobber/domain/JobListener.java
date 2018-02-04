@@ -1,13 +1,27 @@
 package uk.gov.ofwat.jobber.domain;
 
+import org.springframework.scheduling.annotation.Async;
+
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-public interface JobListener {
+public abstract class JobListener {
 
-    public UUID getUUID();
+    private UUID uuid;
 
-    public void setUUID(UUID uuid);
+    public UUID getUUID(){
+        return this.uuid;
+    };
 
-    public void update(Job job);
+    public void setUUID(UUID uuid){
+        this.uuid = uuid;
+    };
+
+    public JobListener(UUID uuid){
+        this.uuid = uuid;
+    }
+
+    @Async
+    public abstract CompletableFuture<Job> update(Job job);
 
 }
