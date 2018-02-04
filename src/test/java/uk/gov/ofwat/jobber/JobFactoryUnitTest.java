@@ -53,18 +53,18 @@ public class JobFactoryUnitTest {
         Mockito.when(jobTypeRepository.findByName(JobTypeConstants.DEFAULT_JOB)).thenReturn(Optional.of(dj));
 
         JobStatus rsjs = new JobStatus(JobStatusConstants.RESPONSE_SUCCESS);
-        JobStatus rsjp = new JobStatus(JobStatusConstants.RESPONSE_PROCESSING);
-        JobStatus rsja = new JobStatus(JobStatusConstants.RESPONSE_ACCEPTED);
-        JobStatus rsjc = new JobStatus(JobStatusConstants.RESPONSE_CREATED);
+        JobStatus rsjp = new JobStatus(JobStatusConstants.RESPONSE_TARGET_PROCESSING);
+        JobStatus rsja = new JobStatus(JobStatusConstants.RESPONSE_TARGET_ACCEPTED);
+        JobStatus rsjc = new JobStatus(JobStatusConstants.RESPONSE_JOB_CREATED);
         JobStatus rsjf = new JobStatus(JobStatusConstants.RESPONSE_FAILURE);
-        JobStatus rsjr = new JobStatus(JobStatusConstants.RESPONSE_REJECTED);
+        JobStatus rsjr = new JobStatus(JobStatusConstants.RESPONSE_TARGET_REJECTED);
         JobStatus rsju = new JobStatus(JobStatusConstants.RESPONSE_UNKNOWN);
-        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PROCESSING)).thenReturn(Optional.of(rsjp));
+        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_PROCESSING)).thenReturn(Optional.of(rsjp));
         Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS)).thenReturn(Optional.of(rsjs));
-        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_REJECTED)).thenReturn(Optional.of(rsjr));
-        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED)).thenReturn(Optional.of(rsja));
+        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_REJECTED)).thenReturn(Optional.of(rsjr));
+        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_ACCEPTED)).thenReturn(Optional.of(rsja));
         Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_FAILURE)).thenReturn(Optional.of(rsjf));
-        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_CREATED)).thenReturn(Optional.of(rsjc));
+        Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_JOB_CREATED)).thenReturn(Optional.of(rsjc));
         Mockito.when(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_UNKNOWN)).thenReturn(Optional.of(rsju));
 
         //Clear metaData.

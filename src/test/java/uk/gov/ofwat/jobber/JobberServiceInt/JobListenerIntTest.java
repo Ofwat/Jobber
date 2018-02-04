@@ -60,7 +60,7 @@ public class JobListenerIntTest {
         Job updateJob;
         TestJobListener testJobListener;
         HashMap<String, String> metadata = new HashMap<String, String>();
-        JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PROCESSING).get();
+        JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_PROCESSING).get();
         Given:{
             job1 = createUnprocessedJob();
             job2 = createUnprocessedJob();

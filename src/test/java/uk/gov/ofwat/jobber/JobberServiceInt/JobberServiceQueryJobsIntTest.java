@@ -153,7 +153,7 @@ public class JobberServiceQueryJobsIntTest {
             assertEquals(retrievedJob.getUuid(), job.getUuid());
             assertEquals(retrievedJob.getId(), job.getId());
             assertEquals(retrievedJob.getJobType(), job.getJobType());
-            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_ACCEPTED);
+            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_JOB_CREATED);
         }
     }
 

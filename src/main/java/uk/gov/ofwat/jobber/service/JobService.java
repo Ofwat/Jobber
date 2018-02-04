@@ -90,7 +90,7 @@ public class JobService {
     }
 
     private Job assignJobStatus(Job job){
-        Optional<JobStatus> jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED);
+        Optional<JobStatus> jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_JOB_CREATED);
         job.setJobStatus(jobStatus.get());
         return job;
     }
@@ -151,12 +151,12 @@ public class JobService {
     }
 
     public List<Job> getUnprocessedJobs(){
-        JobStatus unprocessedJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
+        JobStatus unprocessedJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_JOB_CREATED).get();
         return jobBaseRepository.findDistinctJobsByJobStatusOrderByCreatedDateAsc(unprocessedJobStatus);
     }
 
     public List<Job> getUnprocessedJobsForMe(){
-        JobStatus unprocessedJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
+        JobStatus unprocessedJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_JOB_CREATED).get();
         Target target = jobTargetRepository.findByName(jobServiceProperties.getWhoAmI()).get();
         return jobBaseRepository.findDistinctJobsByJobStatusAndTargetOrderByCreatedDateAsc(unprocessedJobStatus, target);
     }
@@ -168,7 +168,7 @@ public class JobService {
 
     public Optional<Job> getNextJobForTarget(String jobTarget){
         Target target = jobTargetRepository.findByName(jobTarget).get();
-        JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_ACCEPTED).get();
+        JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_JOB_CREATED).get();
         List<Job> jobs = jobBaseRepository.findDistinctJobsByJobStatusAndTargetOrderByCreatedDateAsc(jobStatus, target);
         return jobs.stream().findFirst();
     };
@@ -186,7 +186,7 @@ public class JobService {
         return updateJobStatus(u, jobStatus);
     }
 
-    public Job updateJobStatus(UUID uuid, JobStatus jobStatus){
+    private Job updateJobStatus(UUID uuid, JobStatus jobStatus){
         Job job = (Job) jobBaseRepository.findByUuid(uuid).get();
         job.setJobStatus(jobStatus);
         return (Job) jobBaseRepository.save(job);
@@ -249,7 +249,7 @@ public class JobService {
 
     public DataJob creatDataJob(String jobTargetPlatform, HashMap<String, String> metadata, String data){
         JobInformation jobInformation = new JobInformation.Builder(jobTargetPlatform)
-                .originator(JobTargetPlatformConstants.DCS)
+                .originator(jobServiceProperties.getWhoAmI())
                 .type(JobTypeConstants.DATA_JOB)
                 .setMetaData(metadata)
                 .data(data)

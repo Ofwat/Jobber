@@ -13,14 +13,14 @@ public final class JobStatusConstants {
 
     public static String RESPONSE_FAILURE = "FAILED";
 
-    public static String RESPONSE_PROCESSING = "PROCESSING";
+    public static String RESPONSE_TARGET_PROCESSING = "TARGET_PROCESSING";
 
-    public static String RESPONSE_REJECTED = "REJECTED";
+    public static String RESPONSE_TARGET_REJECTED = "TARGET_REJECTED";
 
-    public static String RESPONSE_ACCEPTED = "ACCEPTED";
+    public static String RESPONSE_TARGET_ACCEPTED = "TARGET_ACCEPTED";
 
     //A new Job awaiting processing.
-    public static String RESPONSE_CREATED = "CREATED";
+    public static String RESPONSE_JOB_CREATED = "JOB_CREATED";
 
     //A Job that has a response
     public static String RESPONSE_LINKED = "LINKED";

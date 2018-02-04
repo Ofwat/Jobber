@@ -197,7 +197,7 @@ public class JobberResourceIntTest {
             put("key2","val2");
             put("targetJobStatus", JobStatusConstants.RESPONSE_SUCCESS);
             put("targetJobUuid",UUID.randomUUID().toString());
-            put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_PROCESSING);}};
+            put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_TARGET_PROCESSING);}};
         AbstractJobFactory jobFactory = new UpdateStatusJobFactory(jobTypeRepository, jobStatusRepository);
         JobInformation jobInformation = new JobInformation.Builder(JobTargetPlatformConstants.DCS)
                 .setMetaData(metaData)

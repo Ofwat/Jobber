@@ -86,7 +86,7 @@ public class JobberServiceProcessJobsIntTest {
         DataJob job;
         DataJob updatedDataJob;
         JobInformation jobInformation;
-        JobStatus updateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PROCESSING).get();
+        JobStatus updateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_PROCESSING).get();
         Given:{
             //Create an update response from Gofer!
             job = jobService.creatDataJob(JobTargetPlatformConstants.DCS, metaData, unencodedJson);
@@ -99,7 +99,7 @@ public class JobberServiceProcessJobsIntTest {
             updatedDataJob = (DataJob) jobService.getJobByUuid(job.getUuid()).get();
         }
         Then:{
-            assertThat(updatedDataJob.getJobStatus().getName(), is(JobStatusConstants.RESPONSE_PROCESSING));
+            assertThat(updatedDataJob.getJobStatus().getName(), is(JobStatusConstants.RESPONSE_TARGET_PROCESSING));
 
             //TODO What else?
 
@@ -139,7 +139,7 @@ public class JobberServiceProcessJobsIntTest {
             assertEquals(retrievedJob.getUuid(), job.getUuid());
             assertEquals(retrievedJob.getId(), job.getId());
             assertEquals(retrievedJob.getJobType(), job.getJobType());
-            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_ACCEPTED);
+            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_TARGET_ACCEPTED);
         }*/
     }
 

@@ -140,7 +140,7 @@ public class JobberServiceCreateJobsIntTest {
             assertThat(retrievedJob, notNullValue());
             assertEquals(retrievedJob.getId(), job.getId());
             assertEquals(retrievedJob.getJobType(), job.getJobType());
-            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_ACCEPTED);
+            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_JOB_CREATED);
         }
     }
 
@@ -204,11 +204,11 @@ public class JobberServiceCreateJobsIntTest {
             //Make a note of it's status
             originalRequestJobStatus = jobService.getJobByUuid(requestJob.getUuid()).get().getJobStatus();
             //The status that the jobs *should* go to.
-            expectedRequestJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PROCESSING).get();
+            expectedRequestJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_TARGET_PROCESSING).get();
             expectedUpdateJobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get();
             //The metadata the reques job should have.
             updateMetadata = new HashMap<String, String>(){{put("dataKey1", "dataValue1");
-                put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_PROCESSING);}};
+                put(JobStatusConstants.JOB_STATUS_KEY, JobStatusConstants.RESPONSE_TARGET_PROCESSING);}};
         }
         When:{
             //Create the update job

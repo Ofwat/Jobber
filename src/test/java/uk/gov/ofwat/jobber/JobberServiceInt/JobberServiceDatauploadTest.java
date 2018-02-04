@@ -93,7 +93,7 @@ public class JobberServiceDatauploadTest {
              retrievedJob = (RequestValidationJob) jobBaseRepository.findByUuid(job.getUuid()).get();
         }
         Then:{
-            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_ACCEPTED);
+            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_JOB_CREATED);
         }
     }
 
@@ -114,7 +114,7 @@ public class JobberServiceDatauploadTest {
         Then:{
             assertNotNull(retrievedJob);
             assertThat(retrievedJob.getTarget().getName(), is(requestJob.getOriginator().getName()));
-            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_ACCEPTED);
+            assertEquals(retrievedJob.getJobStatus().getName(), JobStatusConstants.RESPONSE_JOB_CREATED);
         }
     }
 
