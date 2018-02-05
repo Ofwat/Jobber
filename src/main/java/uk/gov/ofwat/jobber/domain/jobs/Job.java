@@ -27,6 +27,7 @@ import java.util.UUID;
         @JsonSubTypes.Type(value = DefaultJob.class, name = "DefaultJob.KIND"),
         @JsonSubTypes.Type(value = DataJob.class, name = "DataJob.KIND"),
         @JsonSubTypes.Type(value = QueryJob.class, name = "QueryJob.KIND"),
+        @JsonSubTypes.Type(value = DataResponseJob.class, name = "DataResponseJob.KIND"),
         @JsonSubTypes.Type(value = RequestValidationJob.class, name = "RequestValidation.KIND"),
         @JsonSubTypes.Type(value = ResponseValidationJob.class, name = "ResponseValidation.KIND"),
         @JsonSubTypes.Type(value = GetNewJob.class, name = "GetNew.KIND")
@@ -40,7 +41,7 @@ public abstract class Job extends AbstractJobAuditingEntity{
     @Column(name = "retry_count")
     private Long retryCount = 0L;
 
-    @Column(name = "uuid")
+    @Column(name = "uuid", columnDefinition = "varbinary")
     private UUID uuid;
 
     @ManyToOne

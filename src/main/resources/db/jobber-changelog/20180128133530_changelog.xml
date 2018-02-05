@@ -16,12 +16,12 @@
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="jobber_jobPK"/>
             </column>
-            <column name="created_date" type="binary" defaultValueDate="${now}">
+            <column name="created_date" type="timestamp" defaultValueDate="${now}">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_modified_date" type="binary"/>
+            <column name="last_modified_date" type="timestamp"/>
             <column name="retry_count" type="BIGINT"/>
-            <column name="uuid" type="BINARY"/>
+            <column name="uuid" type="binary"/>
             <column name="job_data_id" type="BIGINT"/>
             <column name="job_status_id" type="BIGINT"/>
             <column name="job_type_id" type="BIGINT"/>

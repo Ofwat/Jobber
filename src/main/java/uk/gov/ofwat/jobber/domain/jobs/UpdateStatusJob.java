@@ -10,10 +10,10 @@ import java.util.UUID;
 @JsonDeserialize(as = UpdateStatusJob.class)
 public class UpdateStatusJob extends DefaultJob{
 
-    @Column(name = "target_job_uuid")
+    @Column(name = "target_job_uuid", columnDefinition = "varbinary")
     private UUID targetJobUuid;
 
-    @Column(name = "originator_job_uuid")
+    @Column(name = "originator_job_uuid", columnDefinition = "varbinary")
     private UUID originatorJobUuid;
 
     @Column(name = "new_job_status")
