@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import uk.gov.ofwat.jobber.domain.*;
 import uk.gov.ofwat.jobber.domain.constants.JobStatusConstants;
 import uk.gov.ofwat.jobber.domain.constants.JobTargetPlatformConstants;
@@ -115,7 +116,11 @@ public class JobService {
     private Job assignData(Job job, JobInformation jobInformation){
         if(jobInformation.getData() != ""){
             JobData jobData = new JobData();
-            jobData.setData(Base64.getEncoder().encodeToString(jobInformation.getData().getBytes()));
+            if(org.apache.commons.codec.binary.Base64.isBase64(jobInformation.getData().getBytes())) {
+                jobData.setData(new String(jobInformation.getData().getBytes()));
+            }else{
+                jobData.setData(Base64.getEncoder().encodeToString(jobInformation.getData().getBytes()));
+            }
             jobDataRepository.save(jobData);
             job.setJobData(jobData);
         }
