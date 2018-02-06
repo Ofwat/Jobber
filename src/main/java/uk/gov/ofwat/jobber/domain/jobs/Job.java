@@ -41,8 +41,8 @@ public abstract class Job extends AbstractJobAuditingEntity{
     @Column(name = "retry_count")
     private Long retryCount = 0L;
 
-    @Column(name = "uuid", columnDefinition = "varbinary")
-    private UUID uuid;
+    @Column(name = "uuid")
+    private String uuid;
 
     @ManyToOne
     private JobType jobType;
@@ -78,11 +78,11 @@ public abstract class Job extends AbstractJobAuditingEntity{
         this.id = id;
     };
 
-    public UUID getUuid(){
+    public String getUuid(){
         return this.uuid;
     };
 
-    public UUID setUuid(UUID uuid){
+    public String setUuid(String uuid){
         this.uuid = uuid;
         return uuid;
     };
@@ -154,11 +154,11 @@ public abstract class Job extends AbstractJobAuditingEntity{
     }
 
     @JsonIgnore
-    public Optional<UUID> getLinkedJobUuid(){
-        Optional<UUID> optionalUuid = Optional.empty();
+    public Optional<String> getLinkedJobUuid(){
+        Optional<String> optionalUuid = Optional.empty();
         for(Map.Entry<String, String> entry : metadata.entrySet()) {
             if(entry.getKey().equals(UtilConstants.LINKED_JOB_KEY)){
-                optionalUuid = (Optional<UUID>) Optional.of(UUID.fromString(entry.getValue()));
+                optionalUuid = (Optional<String>) Optional.of(entry.getValue());
             }
         };
         return optionalUuid;

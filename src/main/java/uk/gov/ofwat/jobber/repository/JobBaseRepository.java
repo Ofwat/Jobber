@@ -19,6 +19,6 @@ public interface JobBaseRepository<T extends Job> extends JpaRepository<T, Long>
 
     List<Job> findDistinctJobsByJobStatusInAndTargetOrderByCreatedDateAsc(List<JobStatus> jobStatuses, Target target);
 
-    Optional<Job> findByUuid(UUID uuid);
+    Optional<Job> findByUuid(String uuid);
 
 }

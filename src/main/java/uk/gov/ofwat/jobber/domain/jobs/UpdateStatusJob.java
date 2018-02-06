@@ -4,34 +4,33 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import java.util.UUID;
 
 @Entity
 @JsonDeserialize(as = UpdateStatusJob.class)
 public class UpdateStatusJob extends DefaultJob{
 
-    @Column(name = "target_job_uuid", columnDefinition = "varbinary")
-    private UUID targetJobUuid;
+    @Column(name = "target_job_uuid")
+    private String targetJobUuid;
 
-    @Column(name = "originator_job_uuid", columnDefinition = "varbinary")
-    private UUID originatorJobUuid;
+    @Column(name = "originator_job_uuid")
+    private String originatorJobUuid;
 
     @Column(name = "new_job_status")
     private String newStatus;
 
-    public UUID getTargetJobUuid() {
+    public String getTargetJobUuid() {
         return targetJobUuid;
     }
 
-    public void setTargetJobUuid(UUID targetJobUuid) {
+    public void setTargetJobUuid(String targetJobUuid) {
         this.targetJobUuid = targetJobUuid;
     }
 
-    public UUID getOriginatorJobUuid() {
+    public String getOriginatorJobUuid() {
         return originatorJobUuid;
     }
 
-    public void setOriginatorJobUuid(UUID originatorJobUuid) {
+    public void setOriginatorJobUuid(String originatorJobUuid) {
         this.originatorJobUuid = originatorJobUuid;
     }
 

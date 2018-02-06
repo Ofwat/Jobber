@@ -7,17 +7,17 @@ import java.util.concurrent.CompletableFuture;
 
 public abstract class JobListener {
 
-    private UUID uuid;
+    private String uuid;
 
-    public UUID getUUID(){
+    public String getUUID(){
         return this.uuid;
     };
 
-    public void setUUID(UUID uuid){
+    public void setUUID(String uuid){
         this.uuid = uuid;
     };
 
-    public JobListener(UUID uuid){
+    public JobListener(String uuid){
         this.uuid = uuid;
     }
 

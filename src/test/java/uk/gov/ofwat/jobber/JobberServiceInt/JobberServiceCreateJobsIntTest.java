@@ -209,7 +209,7 @@ public class JobberServiceCreateJobsIntTest {
         RequestValidationJob retrievedRequestJob;
         UpdateStatusJob updateStatusJob;
         UpdateStatusJob retrievedUpdateStatusJob;
-        UUID targetJobUuid;
+        String targetJobUuid;
         JobStatus expectedRequestJobStatus;
         JobStatus originalRequestJobStatus;
         JobStatus originalUpdateJobStatus;

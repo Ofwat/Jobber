@@ -16,21 +16,21 @@
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="jobber_jobPK"/>
             </column>
-            <column name="created_date" type="timestamp" defaultValueDate="${now}">
+            <column name="created_date" type="datetime" defaultValueDate="${now}">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_modified_date" type="timestamp"/>
+            <column name="last_modified_date" type="datetime"/>
             <column name="retry_count" type="BIGINT"/>
-            <column name="uuid" type="binary"/>
+            <column name="uuid" type="varchar(36)"/>
             <column name="job_data_id" type="BIGINT"/>
             <column name="job_status_id" type="BIGINT"/>
             <column name="job_type_id" type="BIGINT"/>
             <column name="originator_id" type="BIGINT"/>
             <column name="target_id" type="BIGINT"/>
-            <column name="target_job_uuid" type="BINARY">
+            <column name="target_job_uuid" type="varchar(36)">
                 <constraints nullable="true"/>
             </column>
-            <column name="originator_job_uuid" type="BINARY">
+            <column name="originator_job_uuid" type="varchar(36)">
                 <constraints nullable="true"/>
             </column>
             <column name="new_job_status" type="varchar(255)">

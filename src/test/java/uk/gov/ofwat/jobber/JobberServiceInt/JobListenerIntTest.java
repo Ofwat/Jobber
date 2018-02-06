@@ -112,7 +112,7 @@ public class JobListenerIntTest {
             return currentJob;
         }
 
-        public TestJobListener(UUID uuid) {
+        public TestJobListener(String uuid) {
             super(uuid);
         }
 

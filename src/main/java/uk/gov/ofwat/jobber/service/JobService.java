@@ -86,7 +86,7 @@ public class JobService {
         job = assignData(job, jobInformation);
         job = assignJobStatus(job);
         job.setMetadata(jobInformation.getMetadata());
-        job.setUuid(UUID.randomUUID());
+        job.setUuid(UUID.randomUUID().toString());
         job = (Job)jobBaseRepository.save(job);
         return job;
     }
@@ -197,16 +197,11 @@ public class JobService {
         return jobBaseRepository.findAll();
     }
 
-    public Optional<Job> getJobByUuid(UUID uuid){
+    public Optional<Job> getJobByUuid(String uuid){
         return jobBaseRepository.findByUuid(uuid);
     }
 
     private Job updateJobStatus(String uuid, JobStatus jobStatus){
-        UUID u = UUID.fromString(uuid);
-        return updateJobStatus(u, jobStatus);
-    }
-
-    private Job updateJobStatus(UUID uuid, JobStatus jobStatus){
         Job job = (Job) jobBaseRepository.findByUuid(uuid).get();
         job.setJobStatus(jobStatus);
         return (Job) jobBaseRepository.save(job);
@@ -244,7 +239,7 @@ public class JobService {
         return job;
     }
 
-    public UpdateStatusJob createUpdateStatusJob(UUID targetJobUuid, String jobTargetPlatform, JobStatus targetJobNewStatus, HashMap<String, String> metadata){
+    public UpdateStatusJob createUpdateStatusJob(String targetJobUuid, String jobTargetPlatform, JobStatus targetJobNewStatus, HashMap<String, String> metadata){
         //Todo the metadata bit will only work with the dataJobs at the moment.
         metadata.put("targetJobUuid",targetJobUuid.toString());
         metadata.put("targetJobStatus", targetJobNewStatus.getName());

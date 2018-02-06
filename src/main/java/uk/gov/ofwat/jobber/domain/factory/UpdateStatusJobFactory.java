@@ -45,7 +45,7 @@ public class UpdateStatusJobFactory implements AbstractJobFactory {
         }
 
         updateStatusJob = new UpdateStatusJob();
-        updateStatusJob.setTargetJobUuid(UUID.fromString(jobInformation.getMetadata().get("targetJobUuid")));
+        updateStatusJob.setTargetJobUuid(jobInformation.getMetadata().get("targetJobUuid"));
         updateStatusJob.setNewStatus(getTargetJobNewStatus(jobInformation).getName());
         updateStatusJob.setMetadata(jobInformation.getMetadata());
         updateStatusJob.setJobType(jobTypeRepository.findByName(JobTypeConstants.UPDATE_STATUS_JOB).get());
