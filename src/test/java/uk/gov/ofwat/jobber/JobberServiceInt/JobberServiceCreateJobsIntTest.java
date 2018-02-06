@@ -128,6 +128,28 @@ public class JobberServiceCreateJobsIntTest {
     }
 
     @Test
+    public void shouldntBase64EncodeTheDataTwice(){
+        Job job;
+        Job retrievedJob;
+        JobInformation jobInformation;
+        Given:{
+            assert base64EncodedJson != null;
+            assert base64EncodedJson.length() > 1;
+            jobInformation = new JobInformation.Builder(jobServiceProperties.getDefaultTarget()).data(base64EncodedJson).build();
+        }
+        When:{
+            job = jobService.createJob(jobInformation);
+            retrievedJob = (Job)jobBaseRepository.findOne(job.getId());
+        }
+        Then:{
+            assertThat(retrievedJob, notNullValue());
+            assertEquals(retrievedJob.getId(), job.getId());
+            assertEquals(retrievedJob.getJobType(), job.getJobType());
+            assertEquals(retrievedJob.getJobData().getData(), base64EncodedJson);
+        }
+    }
+
+    @Test
     public void shouldCreateADefaultUnprocessedJob(){
         Job job;
         Job retrievedJob;
