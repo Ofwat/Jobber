@@ -1,8 +1,11 @@
 package uk.gov.ofwat.jobber.service;
 
 import uk.gov.ofwat.jobber.domain.constants.JobTypeConstants;
+import uk.gov.ofwat.jobber.domain.observer.JobObserver;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class JobInformation {
@@ -15,7 +18,7 @@ public class JobInformation {
     //private final String targetJobUuid;
     private final String originatorJobUuid;
     //private final String targetJobNewStatus;
-
+    private final List<JobObserver> jobObservers;
 
     private JobInformation(Builder builder){
         type = builder.type;
@@ -26,6 +29,7 @@ public class JobInformation {
 /*        targetJobUuid = builder.targetJobUuid;
         targetJobNewStatus = builder.targetJobNewStatus;*/
         originatorJobUuid = builder.originatorJobUuid;
+        jobObservers = builder.jobObservers;
     }
 
     public static class Builder{
@@ -39,6 +43,8 @@ public class JobInformation {
         //private String targetJobNewStatus = "";
 
         private HashMap<String, String> metadata = new HashMap<String, String>();
+        private List<JobObserver> jobObservers = new ArrayList<JobObserver>();
+
 
         public Builder(String targetPlatform){
             this.targetPlatform = targetPlatform;
@@ -57,7 +63,12 @@ public class JobInformation {
         public Builder addMetaData(String key, String value){
           this.metadata.put(key, value);
           return this;
-        };
+        }
+
+        public Builder addJobObserver(JobObserver jobObserver) {
+            this.jobObservers.add(jobObserver);
+            return this;
+        }
 
         public Builder setMetaData(HashMap<String, String> metaData){
             this.metadata = new HashMap<String, String>(metaData);
@@ -107,6 +118,10 @@ public class JobInformation {
 
     public HashMap<String, String> getMetadata() {
         return metadata;
+    }
+
+    public List<JobObserver> getJobObservers() {
+        return jobObservers;
     }
 
 /*    public String getTargetJobUuid() {

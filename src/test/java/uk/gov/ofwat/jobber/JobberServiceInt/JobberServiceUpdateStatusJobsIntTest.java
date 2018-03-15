@@ -171,6 +171,7 @@ public class JobberServiceUpdateStatusJobsIntTest {
         JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get();
         job.setJobStatus(jobStatus);
         job = (Job)jobBaseRepository.save(job);
+        job.alertJobObservers();
         return job;
     };
 

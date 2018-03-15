@@ -43,7 +43,9 @@ public class ProcessDataResponseJob extends ProcessJob {
         dataResponseJob.setJobStatus(updatedDataJobStatus);
         //return all the jobs we have modified.
         jobBaseRepository.save(dataResponseJob);
+        dataResponseJob.alertJobObservers();
         jobBaseRepository.save(originalJob);
+        originalJob.alertJobObservers();
         updatedJobs.add(dataResponseJob);
         updatedJobs.add(originalJob);
         return updatedJobs;

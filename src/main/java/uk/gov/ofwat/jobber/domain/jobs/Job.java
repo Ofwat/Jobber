@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import uk.gov.ofwat.jobber.domain.constants.UtilConstants;
 import uk.gov.ofwat.jobber.domain.jobs.attributes.*;
+import uk.gov.ofwat.jobber.domain.observer.JobObservationSubject;
 
 import javax.persistence.*;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -32,7 +32,7 @@ import java.util.UUID;
         @JsonSubTypes.Type(value = ResponseValidationJob.class, name = "ResponseValidation.KIND"),
         @JsonSubTypes.Type(value = GetNewJob.class, name = "GetNew.KIND")
 })
-public abstract class Job extends AbstractJobAuditingEntity{
+public abstract class Job extends AbstractJobAuditingEntity implements JobObservationSubject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

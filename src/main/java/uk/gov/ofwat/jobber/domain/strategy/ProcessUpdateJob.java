@@ -39,10 +39,12 @@ public class ProcessUpdateJob extends ProcessJob {
                     updateStatusJob.getMetadata());
 
             jobBaseRepository.save(updatedJob);
+            updatedJob.alertJobObservers();
 
             //Update the job we are processing to say it has completed and can be archived.
             updateStatusJob.setJobStatus(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get());
             jobBaseRepository.save(updateStatusJob);
+            updateStatusJob.alertJobObservers();
 
             modifiedJobs.add(updatedJob);
         }else{

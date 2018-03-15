@@ -87,6 +87,7 @@ public class JobService {
         job = assignJobStatus(job);
         job.setMetadata(jobInformation.getMetadata());
         job.setUuid(UUID.randomUUID().toString());
+        job.registerJobObservers(jobInformation.getJobObservers());
         job = (Job)jobBaseRepository.save(job);
         return job;
     }
@@ -201,10 +202,12 @@ public class JobService {
         return jobBaseRepository.findByUuid(uuid);
     }
 
-    private Job updateJobStatus(String uuid, JobStatus jobStatus){
+    public Job updateJobStatus(String uuid, JobStatus jobStatus){
         Job job = (Job) jobBaseRepository.findByUuid(uuid).get();
         job.setJobStatus(jobStatus);
-        return (Job) jobBaseRepository.save(job);
+        job = (Job) jobBaseRepository.save(job);
+        job.alertJobObservers();
+        return job;
     }
 
     /**

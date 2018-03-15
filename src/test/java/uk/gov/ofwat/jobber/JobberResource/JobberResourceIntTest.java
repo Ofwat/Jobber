@@ -93,7 +93,7 @@ public class JobberResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        JobberResource jobberResource = new JobberResource(jobService);
+        JobberResource jobberResource = new JobberResource(jobService, jobStatusRepository);
         this.restJobberMockMvc = MockMvcBuilders.standaloneSetup(jobberResource)
                 .setCustomArgumentResolvers(pageableArgumentResolver)
                 .setControllerAdvice(jobberExceptionTranslator)
@@ -235,6 +235,7 @@ public class JobberResourceIntTest {
         JobStatus jobStatus = jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_SUCCESS).get();
         job.setJobStatus(jobStatus);
         job = (Job)jobBaseRepository.save(job);
+        job.alertJobObservers();
         return job;
     };
 

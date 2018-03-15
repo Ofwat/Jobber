@@ -36,6 +36,7 @@ public class ProcessDataJob extends ProcessJob {
         //We need to update the job to show we have looked at it otherwise it will get processed again.
         job.setJobStatus(jobStatusRepository.findOneByName(JobStatusConstants.RESPONSE_PENDING_ACTION).get());
         job = (Job) jobBaseRepository.save(job);
+        job.alertJobObservers();
         jobs.add(job);
         return jobs;
     }

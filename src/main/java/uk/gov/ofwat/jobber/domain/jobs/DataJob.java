@@ -24,6 +24,9 @@ public class DataJob extends DefaultJob {
     @Column(name = "fountain_excel_mongo_id")
     private String excelMongoDocId;
 
+    @Column(name = "company_data_input_id")
+    private String companyDataInputId;
+
     public String getFountainReportId() {
         return fountainReportId;
     }
@@ -62,5 +65,13 @@ public class DataJob extends DefaultJob {
 
     public void setExcelMongoDocId(String excelMongoDocId) {
         this.excelMongoDocId = excelMongoDocId;
+    }
+
+    public String getCompanyDataInputId() {
+        return companyDataInputId;
+    }
+
+    public void setCompanyDataInputId(String companyDataInputId) {
+        this.companyDataInputId = companyDataInputId;
     }
 }

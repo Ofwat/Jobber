@@ -33,6 +33,7 @@ public class DataJobFactory implements AbstractJobFactory {
         dataJob.setCompanyId(metadata.get("companyId"));
         dataJob.setFountainReportId(metadata.get("fountainReportId"));
         dataJob.setRunId(metadata.get("runId"));
+        dataJob.setCompanyDataInputId(metadata.get("companyDataInputId"));
         return dataJob;
     }
 
